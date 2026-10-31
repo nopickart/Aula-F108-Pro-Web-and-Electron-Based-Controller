@@ -1,4 +1,4 @@
-const CACHE_NAME = 'aula-f108-v1';
+const CACHE_NAME = 'aula-f108-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -40,20 +40,18 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Assets: Cache First, fallback to Network
+  // Network First for all assets in development
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((response) => {
-        if (!response || response.status !== 200 || response.type !== 'basic') {
-          return response;
+    fetch(event.request)
+      .then((response) => {
+        if (response && response.status === 200 && response.type === 'basic') {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
         }
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
         return response;
-      }).catch(() => caches.match(event.request));
-    })
+      })
+      .catch(() => caches.match(event.request))
   );
 });

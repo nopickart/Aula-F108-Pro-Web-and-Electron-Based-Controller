@@ -4,27 +4,40 @@ export const VENDOR_ID = 0x0C45;
 export const PRODUCT_ID = 0x800A;
 
 export const LIGHTING_MODES: LightingModeInfo[] = [
-  { id: 0, name: 'Off', description: 'Backlight turned off completely', hasColor: false, hasSpeed: false, hasDirection: false, isRainbow: false },
-  { id: 1, name: 'Static', description: 'Constant solid color without animation', hasColor: true, hasSpeed: false, hasDirection: false, isRainbow: false },
-  { id: 2, name: 'SingleOn', description: 'Keys light up when pressed then fade out', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
-  { id: 3, name: 'SingleOff', description: 'Backlight stays on, keys dim when pressed', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
-  { id: 4, name: 'Glittering', description: 'Subtle twinkling starlight across keys', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
-  { id: 5, name: 'Falling', description: 'Raindrop cascades descending down the keyboard', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
-  { id: 6, name: 'Colourful', description: 'Dynamic full-spectrum multi-color pattern', hasColor: false, hasSpeed: true, hasDirection: false, isRainbow: true },
-  { id: 7, name: 'Breath', description: 'Smooth pulsing breathing light effect', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
-  { id: 8, name: 'Spectrum', description: 'Continuous cycling through the color spectrum', hasColor: false, hasSpeed: true, hasDirection: false, isRainbow: true },
-  { id: 9, name: 'Outward', description: 'Radial expansion emitting outward from center', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
-  { id: 10, name: 'Scrolling', description: 'Horizontal color wave scrolling left or right', hasColor: true, hasSpeed: true, hasDirection: true, isRainbow: false },
-  { id: 11, name: 'Rolling', description: 'Vertical rolling rainbow or color wave', hasColor: true, hasSpeed: true, hasDirection: true, isRainbow: false },
-  { id: 12, name: 'Rotating', description: 'Circular rotating color vortex', hasColor: true, hasSpeed: true, hasDirection: true, isRainbow: false },
-  { id: 13, name: 'Explode', description: 'Keys trigger bursting light waves upon strike', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
-  { id: 14, name: 'Launch', description: 'Vertical light trail shooting up from pressed keys', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
-  { id: 15, name: 'Ripples', description: 'Concentric water ripple propagating from pressed key', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
-  { id: 16, name: 'Flowing', description: 'Fluid chromatic streams flowing along the rows', hasColor: true, hasSpeed: true, hasDirection: true, isRainbow: false },
-  { id: 17, name: 'Pulsating', description: 'Rhythmic ambient pulse reverberating across keys', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
-  { id: 18, name: 'Tilt', description: 'Diagonal wave pattern slanting across key rows', hasColor: true, hasSpeed: true, hasDirection: true, isRainbow: false },
-  { id: 19, name: 'Shuttle', description: 'Laser shuttle beam pinging across columns', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
+  { id: 0, name: 'Off', nameTr: 'Kapalı', description: 'Backlight turned off completely', descriptionTr: 'Arka aydınlatma tamamen kapatılır', hasColor: false, hasSpeed: false, hasDirection: false, isRainbow: false },
+  { id: 1, name: 'Static', nameTr: 'Sabit', description: 'Constant solid color without animation', descriptionTr: 'Animasyonsuz, tek renk sabit aydınlatma', hasColor: true, hasSpeed: false, hasDirection: false, isRainbow: false },
+  { id: 2, name: 'SingleOn', nameTr: 'Tekli Yanma', description: 'Keys light up when pressed then fade out', descriptionTr: 'Basılan tuşlar yanar, ardından yavaşça söner', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
+  { id: 3, name: 'SingleOff', nameTr: 'Tekli Sönme', description: 'Backlight stays on, keys dim when pressed', descriptionTr: 'Işıklar sürekli açık, basılan tuş geçici söner', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
+  { id: 4, name: 'Glittering', nameTr: 'Yıldız Kayması', description: 'Subtle twinkling starlight across keys', descriptionTr: 'Tuşlar arasında hafif yıldırıltılı parlamalar', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
+  { id: 5, name: 'Falling', nameTr: 'Yağmur Damlası', description: 'Raindrop cascades descending down the keyboard', descriptionTr: 'Yukarıdan aşağı süzülen damla efektleri', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
+  { id: 6, name: 'Colourful', nameTr: 'Renkli Ahenk', description: 'Dynamic full-spectrum multi-color pattern', descriptionTr: 'Dinamik tam spektrum çok renkli desen', hasColor: false, hasSpeed: true, hasDirection: false, isRainbow: true },
+  { id: 7, name: 'Breath', nameTr: 'Nefes Alma', description: 'Smooth pulsing breathing light effect', descriptionTr: 'Yumuşak ritmik nefes alma ışık efekti', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
+  { id: 8, name: 'Spectrum', nameTr: 'Spektrum Döngüsü', description: 'Continuous cycling through the color spectrum', descriptionTr: 'Renk spektrumunda kesintisiz canlı geçiş', hasColor: false, hasSpeed: true, hasDirection: false, isRainbow: true },
+  { id: 9, name: 'Outward', nameTr: 'Dışa Yayılma', description: 'Radial expansion emitting outward from center', descriptionTr: 'Merkezden dışa doğru yayılan dairesel ışık', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
+  { id: 10, name: 'Scrolling', nameTr: 'Süzülen Dalga', description: 'Horizontal color wave scrolling left or right', descriptionTr: 'Yatay yönde kayan renk dalgası', hasColor: true, hasSpeed: true, hasDirection: true, isRainbow: false },
+  { id: 11, name: 'Rolling', nameTr: 'Dikey Akış', description: 'Vertical rolling rainbow or color wave', descriptionTr: 'Dikey doğrultuda akan renk dalgası', hasColor: true, hasSpeed: true, hasDirection: true, isRainbow: false },
+  { id: 12, name: 'Rotating', nameTr: 'Girdap', description: 'Circular rotating color vortex', descriptionTr: 'Dairesel dönen renkli ışık girdabı', hasColor: true, hasSpeed: true, hasDirection: true, isRainbow: false },
+  { id: 13, name: 'Explode', nameTr: 'Patlama', description: 'Keys trigger bursting light waves upon strike', descriptionTr: 'Tuşa basıldığında etrafa saçılan ışık patlaması', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
+  { id: 14, name: 'Launch', nameTr: 'Fırlatma', description: 'Vertical light trail shooting up from pressed keys', descriptionTr: 'Basılan tuştan yukarı fırlayan dikey ışık izi', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
+  { id: 15, name: 'Ripples', nameTr: 'Su Halka Dalgaları', description: 'Concentric water ripple propagating from pressed key', descriptionTr: 'Basılan tuştan dışa doğru yayılan su halkaları', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
+  { id: 16, name: 'Flowing', nameTr: 'Akıcı Nehir', description: 'Fluid chromatic streams flowing along the rows', descriptionTr: 'Tuş sıraları boyunca akan akışkan renk nehri', hasColor: true, hasSpeed: true, hasDirection: true, isRainbow: false },
+  { id: 17, name: 'Pulsating', nameTr: 'Nabız', description: 'Rhythmic ambient pulse reverberating across keys', descriptionTr: 'Klavye genelinde ritmik ortam nabız vuruşu', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
+  { id: 18, name: 'Tilt', nameTr: 'Çapraz Dalga', description: 'Diagonal wave pattern slanting across key rows', descriptionTr: 'Tuş sıraları boyunca çapraz ilerleyen dalga', hasColor: true, hasSpeed: true, hasDirection: true, isRainbow: false },
+  { id: 19, name: 'Shuttle', nameTr: 'Mekik', description: 'Laser shuttle beam pinging across columns', descriptionTr: 'Sütunlar arasında gidip gelen lazer mekik ışığı', hasColor: true, hasSpeed: true, hasDirection: false, isRainbow: false },
 ];
+
+export function getLightingModeDetails(mode: LightingModeInfo, lang: string = 'tr') {
+  if (lang === 'tr') {
+    return {
+      name: mode.nameTr || mode.name,
+      description: mode.descriptionTr || mode.description,
+    };
+  }
+  return {
+    name: mode.name,
+    description: mode.description,
+  };
+}
 
 export const CONSUMER_ACTIONS: { [name: string]: { label: string; code: number } } = {
   play: { label: 'Play / Pause', code: 0xCD },

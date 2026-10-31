@@ -100,17 +100,6 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </div>
 
-            {/* Yeni Sekmede Aç Link */}
-            <a
-              href={typeof window !== 'undefined' ? window.location.href : '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-cyan-300 border border-slate-700 hover:border-cyan-500/50 transition-all shadow-sm cursor-pointer whitespace-nowrap"
-              title="Open standalone for unrestricted WebHID access"
-            >
-              <ExternalLink className="w-3.5 h-3.5 mr-1.5 text-cyan-400" />
-              {t('openNewTab')}
-            </a>
 
             {deviceState.isConnected ? (
               <button

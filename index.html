@@ -11,10 +11,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Aula F108" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <title>Aula F108 Pro Linux Controller</title>
-    <meta name="description" content="Aula F108 Pro Mechanical Keyboard Configurator & Linux Protocol Studio: backlight effects, per-key RGB, key remapping, LCD screen sync, and WebHID control." />
-    <meta property="og:title" content="Aula F108 Pro Linux Controller" />
-    <meta property="og:description" content="Aula F108 Pro Mechanical Keyboard Configurator & Linux Protocol Studio: backlight effects, per-key RGB, key remapping, LCD screen sync, and WebHID control." />
+    <title>Aula F108 Pro Keyboard Controller</title>
+    <meta name="description" content="Aula F108 Pro Mechanical Keyboard Configurator & Protocol Studio: backlight effects, per-key RGB, key remapping, LCD screen sync, and WebHID control." />
+    <meta property="og:title" content="Aula F108 Pro Keyboard Controller" />
+    <meta property="og:description" content="Aula F108 Pro Mechanical Keyboard Configurator & Protocol Studio: backlight effects, per-key RGB, key remapping, LCD screen sync, and WebHID control." />
   </head>
   <body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-cyan-500/30 selection:text-cyan-200">
     <div id="root"></div>
@@ -22,7 +22,16 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch((err) => {
+          if ('caches' in window) {
+            caches.keys().then((names) => {
+              for (let name of names) {
+                if (name !== 'aula-f108-v3') caches.delete(name);
+              }
+            });
+          }
+          navigator.serviceWorker.register('/sw.js').then((reg) => {
+            reg.update();
+          }).catch((err) => {
             console.log('SW registration failed:', err);
           });
         });

@@ -450,8 +450,8 @@ export const RemapTab: React.FC<RemapTabProps> = ({
           </div>
         </div>
 
-        {/* Apply & CLI Command Card */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4">
+        {/* Apply Card */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-center space-y-4">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-slate-200">YAML Config & Apply</h3>
@@ -483,26 +483,6 @@ export const RemapTab: React.FC<RemapTabProps> = ({
             </button>
           </div>
 
-          {/* Linux CLI Box */}
-          <div className="bg-slate-950 rounded-xl p-3 border border-slate-800">
-            <div className="flex items-center justify-between mb-1.5 text-[11px] text-slate-400">
-              <span className="font-mono">{t('linuxCliCommand')}</span>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(cliCommand);
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
-                }}
-                className="flex items-center gap-1 text-cyan-400 hover:text-cyan-300 font-medium cursor-pointer"
-              >
-                {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                {copied ? t('copySuccess') : t('copy')}
-              </button>
-            </div>
-            <code className="text-xs font-mono text-cyan-300 break-all select-all block">
-              {cliCommand}
-            </code>
-          </div>
         </div>
       </div>
     </div>

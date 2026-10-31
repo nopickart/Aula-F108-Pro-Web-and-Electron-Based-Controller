@@ -252,10 +252,19 @@ export const PerKeyRgbTab: React.FC<PerKeyRgbTabProps> = ({
                 }}
                 className="flex flex-col items-center p-2 rounded-xl border border-slate-700 bg-slate-800/60 hover:bg-slate-800 cursor-pointer group transition-all"
               >
-                <span
-                  className="w-5 h-5 rounded-full mb-1 shadow-sm group-hover:scale-110 transition-transform"
-                  style={{ backgroundColor: c.hex }}
-                />
+                <svg
+                  className="w-5 h-5 rounded-full mb-1 shadow-sm group-hover:scale-110 transition-transform overflow-visible"
+                  viewBox="0 0 20 20"
+                >
+                  <circle
+                    cx="10"
+                    cy="10"
+                    r="8.5"
+                    fill={c.hex}
+                    stroke={c.rgb[0] > 200 && c.rgb[1] > 200 && c.rgb[2] > 200 ? '#cbd5e1' : '#334155'}
+                    strokeWidth="1.5"
+                  />
+                </svg>
                 <span className="text-[10px] text-slate-300 truncate w-full text-center">
                   {lang === 'tr' ? c.nameTr : c.name}
                 </span>
@@ -283,8 +292,8 @@ export const PerKeyRgbTab: React.FC<PerKeyRgbTabProps> = ({
           </div>
         </div>
 
-        {/* Apply, Import/Export & CLI Preview */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4">
+        {/* Apply, Import/Export Card */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-center space-y-4">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-slate-200">{t('yamlConfigAndApply')}</h3>
@@ -316,26 +325,6 @@ export const PerKeyRgbTab: React.FC<PerKeyRgbTabProps> = ({
             </button>
           </div>
 
-          {/* Linux CLI Box */}
-          <div className="bg-slate-950 rounded-xl p-3 border border-slate-800">
-            <div className="flex items-center justify-between mb-1.5 text-[11px] text-slate-400">
-              <span className="font-mono">{t('linuxCliCommand')}</span>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(cliCommand);
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
-                }}
-                className="flex items-center gap-1 text-cyan-400 hover:text-cyan-300 font-medium cursor-pointer"
-              >
-                {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                {copied ? t('copySuccess') : t('copy')}
-              </button>
-            </div>
-            <code className="text-xs font-mono text-cyan-300 break-all select-all block">
-              {cliCommand}
-            </code>
-          </div>
         </div>
       </div>
     </div>

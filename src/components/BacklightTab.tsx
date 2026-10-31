@@ -1,5 +1,5 @@
 import React from 'react';
-import { LIGHTING_MODES } from '../lib/aula-constants';
+import { LIGHTING_MODES, getLightingModeDetails } from '../lib/aula-constants';
 import { LightingConfig, LightingModeId } from '../types/aula';
 import { Play, Copy, Check, Sparkles, Sliders, Sun, Gauge, MoveHorizontal, Info } from 'lucide-react';
 
@@ -15,14 +15,14 @@ interface BacklightTabProps {
 }
 
 const PRESET_COLORS = [
-  { name: 'Red', hex: '#EF4444', r: 255, g: 0, b: 0 },
-  { name: 'Cyan', hex: '#06B6D4', r: 0, g: 255, b: 255 },
-  { name: 'Green', hex: '#10B981', r: 0, g: 255, b: 0 },
-  { name: 'Blue', hex: '#3B82F6', r: 0, g: 0, b: 255 },
-  { name: 'Purple', hex: '#A855F7', r: 168, g: 85, b: 247 },
-  { name: 'Orange', hex: '#F97316', r: 249, g: 115, b: 22 },
-  { name: 'Yellow', hex: '#EAB308', r: 234, g: 179, b: 8 },
-  { name: 'White', hex: '#F8FAFC', r: 255, g: 255, b: 255 },
+  { key: 'colorRed', hex: '#EF4444', r: 255, g: 0, b: 0 },
+  { key: 'colorCyan', hex: '#06B6D4', r: 0, g: 255, b: 255 },
+  { key: 'colorGreen', hex: '#10B981', r: 0, g: 255, b: 0 },
+  { key: 'colorBlue', hex: '#3B82F6', r: 0, g: 0, b: 255 },
+  { key: 'colorPurple', hex: '#A855F7', r: 168, g: 85, b: 247 },
+  { key: 'colorOrange', hex: '#F97316', r: 249, g: 115, b: 22 },
+  { key: 'colorYellow', hex: '#EAB308', r: 234, g: 179, b: 8 },
+  { key: 'colorWhite', hex: '#FFFFFF', r: 255, g: 255, b: 255 },
 ];
 
 export const BacklightTab: React.FC<BacklightTabProps> = ({
@@ -37,6 +37,7 @@ export const BacklightTab: React.FC<BacklightTabProps> = ({
   const [copied, setCopied] = React.useState(false);
 
   const activeModeInfo = LIGHTING_MODES.find((m) => m.id === config.mode) || LIGHTING_MODES[1];
+  const activeModeDetails = getLightingModeDetails(activeModeInfo, lang);
 
   const handleCopyCli = () => {
     navigator.clipboard.writeText(cliCommand);
@@ -83,13 +84,14 @@ export const BacklightTab: React.FC<BacklightTabProps> = ({
             </h2>
           </div>
           <span className="text-xs text-slate-400">
-            {t('selectedMode')}: <strong className="text-cyan-300">{activeModeInfo.name}</strong> (Mode {config.mode})
+            {t('selectedMode')}: <strong className="text-cyan-300">{activeModeDetails.name}</strong> (Mode {config.mode})
           </span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
           {LIGHTING_MODES.map((mode) => {
             const isSelected = config.mode === mode.id;
+            const details = getLightingModeDetails(mode, lang);
             return (
               <button
                 key={mode.id}
@@ -102,12 +104,12 @@ export const BacklightTab: React.FC<BacklightTabProps> = ({
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className={`text-xs font-bold ${isSelected ? 'text-cyan-300' : 'text-slate-200'}`}>
-                    {mode.name}
+                    {details.name}
                   </span>
                   <span className="text-[10px] font-mono text-slate-500">#{mode.id}</span>
                 </div>
                 <p className="text-[11px] text-slate-400 line-clamp-1 leading-snug">
-                  {mode.description}
+                  {details.description}
                 </p>
                 {isSelected && (
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-500 to-blue-500" />
@@ -150,7 +152,7 @@ export const BacklightTab: React.FC<BacklightTabProps> = ({
                     config.r === color.r && config.g === color.g && config.b === color.b;
                   return (
                     <button
-                      key={color.name}
+                      key={color.key}
                       onClick={() =>
                         onChange({
                           ...config,
@@ -166,11 +168,20 @@ export const BacklightTab: React.FC<BacklightTabProps> = ({
                           : 'border-slate-700 bg-slate-800/60 hover:bg-slate-800'
                       }`}
                     >
-                      <span
-                        className="w-3.5 h-3.5 rounded-full shadow-sm"
-                        style={{ backgroundColor: color.hex }}
-                      />
-                      <span className="text-slate-300 text-[11px] truncate">{color.name}</span>
+                      <svg
+                        className="w-4 h-4 rounded-full shrink-0 shadow-sm overflow-visible"
+                        viewBox="0 0 16 16"
+                      >
+                        <circle
+                          cx="8"
+                          cy="8"
+                          r="7"
+                          fill={color.hex}
+                          stroke={color.r > 200 && color.g > 200 && color.b > 200 ? '#cbd5e1' : '#334155'}
+                          strokeWidth="1.5"
+                        />
+                      </svg>
+                      <span className="text-slate-300 text-[11px] truncate">{t(color.key as any)}</span>
                     </button>
                   );
                 })}
@@ -285,39 +296,22 @@ export const BacklightTab: React.FC<BacklightTabProps> = ({
           </div>
         </div>
 
-        {/* Action & Linux Command Card */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4">
-          <div>
+        {/* Action Card */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-center items-center text-center space-y-4">
+          <div className="w-full">
             <h3 className="text-sm font-semibold text-slate-200 mb-2">{t('applyToKeyboard')}</h3>
-            <p className="text-xs text-slate-400 mb-4">
+            <p className="text-xs text-slate-400 mb-5 max-w-sm mx-auto">
               {t('lightingStepDesc')}
             </p>
 
             <button
               onClick={onApply}
               disabled={isBusy}
-              className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 disabled:opacity-60 text-slate-950 font-bold text-sm shadow-lg shadow-cyan-500/20 transition-all cursor-pointer"
+              className="w-full flex items-center justify-center space-x-2 py-3.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 disabled:opacity-60 text-slate-950 font-bold text-sm shadow-lg shadow-cyan-500/20 transition-all cursor-pointer"
             >
               <Play className={`w-4 h-4 fill-current ${isBusy ? 'animate-spin' : ''}`} />
               <span>{isBusy ? t('sendingToKeyboard') : t('applyLightingBtn')}</span>
             </button>
-          </div>
-
-          {/* Linux CLI Command Box */}
-          <div className="bg-slate-950 rounded-xl p-3 border border-slate-800">
-            <div className="flex items-center justify-between mb-1.5 text-[11px] text-slate-400">
-              <span className="font-mono">{t('linuxCliCommand')}</span>
-              <button
-                onClick={handleCopyCli}
-                className="flex items-center gap-1 text-cyan-400 hover:text-cyan-300 font-medium cursor-pointer"
-              >
-                {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                {copied ? t('copySuccess') : t('copy')}
-              </button>
-            </div>
-            <code className="text-xs font-mono text-cyan-300 break-all select-all block">
-              {cliCommand}
-            </code>
           </div>
         </div>
       </div>

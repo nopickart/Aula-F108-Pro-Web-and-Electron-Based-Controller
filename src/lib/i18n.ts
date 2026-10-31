@@ -4,7 +4,7 @@ export const TRANSLATIONS = {
   tr: {
     // Header
     appTitle: 'Aula F108 Pro',
-    appSubtitle: 'Linux Mekanik Klavye Yapılandırma & Protokol Stüdyosu',
+    appSubtitle: 'Mekanik Klavye Yapılandırma & Protokol Stüdyosu',
     physicalConnected: 'Fiziksel Klavye Bağlı',
     simulatorActive: 'Donanım Simülatörü Aktif',
     openNewTab: 'Yeni Sekmede Aç',
@@ -17,7 +17,7 @@ export const TRANSLATIONS = {
     tabPerKey: 'Tuş Başına RGB',
     tabRemap: 'Tuş Eşleme (Remap)',
     tabLcd: 'LCD Ekran & Saat',
-    tabPackets: 'HID Paket & Linux',
+    tabPackets: 'HID Paket Akışı',
 
     // Iframe Notice
     iframeNotice: 'WebHID İframe Uyarısı:',
@@ -185,11 +185,22 @@ export const TRANSLATIONS = {
     uploadSuccessToast: 'Görsel doğrudan klavyeye başarıyla yüklendi!',
     copySuccess: 'Panoya Kopyalandı',
     copy: 'Kopyala',
+
+    // Colors
+    colorRed: 'Kırmızı',
+    colorCyan: 'Gök Mavisi',
+    colorGreen: 'Yeşil',
+    colorBlue: 'Mavi',
+    colorPurple: 'Mor',
+    colorOrange: 'Turuncu',
+    colorYellow: 'Sarı',
+    colorWhite: 'Beyaz',
+    modeOff: 'Kapalı',
   },
   en: {
     // Header
     appTitle: 'Aula F108 Pro',
-    appSubtitle: 'Linux Mechanical Keyboard Configuration & Protocol Studio',
+    appSubtitle: 'Mechanical Keyboard Configuration & Protocol Studio',
     physicalConnected: 'Physical Keyboard Connected',
     simulatorActive: 'Hardware Simulator Active',
     openNewTab: 'Open in New Tab',
@@ -202,7 +213,7 @@ export const TRANSLATIONS = {
     tabPerKey: 'Per-Key RGB',
     tabRemap: 'Key Remapping',
     tabLcd: 'LCD Screen & Clock',
-    tabPackets: 'HID Packet & Linux',
+    tabPackets: 'HID Packet Stream',
 
     // Iframe Notice
     iframeNotice: 'WebHID Iframe Notice:',
@@ -346,6 +357,21 @@ export const TRANSLATIONS = {
     copyScript: 'Copy Script',
     downloadScript: 'Download .sh',
 
+    // PWA & Desktop Launcher
+    installApp: 'Install / Download App',
+    installedApp: 'Desktop App Installed',
+    downloadDesktopLauncher: 'Download Linux Launcher (.desktop)',
+    openStandaloneApp: 'One-Click Desktop Launcher',
+    downloadDesktopTip: 'Add to your desktop or app menu to launch with one click.',
+    installModalTitle: 'Aula F108 Pro Controller - Desktop Setup',
+    installModalDesc: 'Install as a standalone desktop app or download a one-click Linux desktop launcher (.desktop).',
+    pwaFeature1: 'Unrestricted direct WebHID USB access',
+    pwaFeature2: 'Launches in separate window with native app icon',
+    pwaFeature3: 'Works completely offline without internet',
+    installPwaBtn: 'Install as Desktop App (PWA)',
+    downloadDesktopBtn: 'Download .desktop Launcher',
+    closeModal: 'Close',
+
     // Toasts & Alerts
     appliedBacklightSuccess: 'Backlight effect applied directly to keyboard!',
     appliedPerKeySuccess: 'Per-key colors applied directly to keyboard!',
@@ -355,9 +381,21 @@ export const TRANSLATIONS = {
     uploadSuccessToast: 'Image transferred to keyboard LCD screen!',
     copySuccess: 'Copied to Clipboard',
     copy: 'Copy',
+
+    // Colors
+    colorRed: 'Red',
+    colorCyan: 'Cyan',
+    colorGreen: 'Green',
+    colorBlue: 'Blue',
+    colorPurple: 'Purple',
+    colorOrange: 'Orange',
+    colorYellow: 'Yellow',
+    colorWhite: 'White',
+    modeOff: 'Off',
   },
 };
 
 export function getTranslation(lang: Language, key: keyof typeof TRANSLATIONS['tr']): string {
-  return TRANSLATIONS[lang][key] || TRANSLATIONS['tr'][key] || key;
+  const dict = TRANSLATIONS[lang] as Record<string, string>;
+  return dict[key] || TRANSLATIONS['tr'][key] || key;
 }

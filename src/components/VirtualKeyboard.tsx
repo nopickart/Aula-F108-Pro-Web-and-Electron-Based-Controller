@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { ALL_KEYS, KEY_BY_CODE } from '../lib/aula-constants';
+import React, { useMemo, useState } from 'react';
+import { ALL_KEYS, KEY_BY_CODE, LIGHTING_MODES, getLightingModeDetails } from '../lib/aula-constants';
 import { KeyDef, LightingConfig } from '../types/aula';
 import { Language, getTranslation } from '../lib/i18n';
 
@@ -27,6 +27,23 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
   lang = 'tr',
 }) => {
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
+  
+  const activeModeInfo = LIGHTING_MODES.find((m) => m.id === lightingConfig.mode) || LIGHTING_MODES[1];
+  const activeModeDetails = getLightingModeDetails(activeModeInfo, lang);
+
+  // Interactive Rotary Knob Rotation
+  const [knobRotation, setKnobRotation] = useState<number>(45);
+
+  const handleKnobClick = () => {
+    setKnobRotation((prev) => (prev + 30) % 360);
+  };
+
+  const handleKnobWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 15 : -15;
+    setKnobRotation((prev) => (prev + delta + 360) % 360);
+  };
+
   // Format digital clock for mini LCD
   const timeString = useMemo(() => {
     return currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
@@ -77,9 +94,9 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
   }, []);
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl relative overflow-hidden">
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl relative overflow-hidden flex flex-col items-center">
       {/* Keyboard Case Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-800 text-xs text-slate-400">
+      <div className="w-full flex flex-wrap items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-800 text-xs text-slate-400">
         <div className="flex items-center space-x-3">
           <span className="font-semibold text-slate-200 tracking-wider">{t('keyboardModel')}</span>
           <span className="px-2 py-0.5 rounded bg-slate-800 text-cyan-400 font-mono text-[11px] border border-slate-700">
@@ -87,40 +104,93 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
           </span>
           <span className="hidden sm:inline-block text-slate-500">•</span>
           <span className="hidden sm:inline-block text-slate-400">
-            {mode === 'perkey' ? t('tabPerKey') : mode === 'backlight' ? `${t('tabBacklight')}: ${lightingConfig.mode === 0 ? 'Off' : `Mode ${lightingConfig.mode}`}` : t('tabRemap')}
+            {mode === 'perkey' ? t('tabPerKey') : mode === 'backlight' ? `${t('tabBacklight')}: ${activeModeDetails.name}` : t('tabRemap')}
           </span>
         </div>
 
-        {/* Mini LCD Screen on keyboard */}
+        {/* Mini LCD Status Info */}
         <div className="flex items-center space-x-2">
-          <span className="text-[11px] text-slate-400">{t('keyboardLcdLabel')}</span>
-          <div className="relative w-36 h-12 bg-black rounded-lg border-2 border-slate-700 shadow-inner overflow-hidden flex flex-col items-center justify-center p-1 font-mono">
-            {lcdPreviewUrl ? (
-              <img src={lcdPreviewUrl} alt="LCD Preview" className="w-full h-full object-cover" />
-            ) : (
-              <div className="text-center">
-                <div className="text-cyan-400 font-bold text-xs tracking-wider animate-pulse">
-                  {timeString}
-                </div>
-                <div className="text-[9px] text-slate-400 font-medium">
-                  {dateString}
-                </div>
-              </div>
-            )}
-            <div className="absolute top-0.5 right-1 w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping opacity-75"></div>
-          </div>
+          <span className="px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 font-mono text-xs border border-slate-700/80 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span className="text-slate-400">{t('keyboardLcdLabel')}</span>
+            <span className="text-cyan-300 font-bold">1.14" TFT (240×135) + Knob</span>
+          </span>
         </div>
       </div>
 
       {/* Keyboard Matrix Container */}
-      <div className="overflow-x-auto pb-2">
-        <div className="min-w-[920px] select-none p-3 rounded-xl bg-slate-950/80 border border-slate-800 shadow-2xl flex flex-col space-y-1.5">
+      <div className="overflow-x-auto w-full flex justify-center pb-2 pt-4">
+        <div className="w-[964px] select-none p-3 rounded-xl bg-slate-950/80 border border-slate-800 shadow-2xl flex flex-col space-y-1.5 shrink-0 relative">
           {rows.map((rowKeys, rowIndex) => (
             <div
               key={rowIndex}
               className="relative flex items-center h-10"
-              style={{ minWidth: '900px', zIndex: 20 - rowIndex }}
+              style={{ minWidth: '940px', zIndex: 20 - rowIndex }}
             >
+              {/* Row 0: 240x135 TFT LCD Screen (cols 19-21) and Rotary Knob (col 22) */}
+              {rowIndex === 0 && (
+                <>
+                  {/* 240x135 TFT LCD Screen */}
+                  <div
+                    style={{
+                      left: '779px',
+                      width: '120px',
+                      height: '68px',
+                      top: '-28px',
+                    }}
+                    className="absolute rounded-lg bg-black border-2 border-slate-700/90 shadow-xl shadow-cyan-500/10 overflow-hidden flex flex-col items-center justify-center p-0.5 font-mono z-30 group ring-1 ring-slate-800"
+                    title={`${t('keyboardLcdLabel')} (240×135 TFT)`}
+                  >
+                    {lcdPreviewUrl ? (
+                      <img src={lcdPreviewUrl} alt="LCD Preview" className="w-full h-full object-cover rounded" />
+                    ) : (
+                      <div className="text-center flex flex-col items-center justify-center h-full w-full bg-slate-950">
+                        <div className="text-cyan-400 font-bold text-xs tracking-wider animate-pulse leading-none mb-1">
+                          {timeString}
+                        </div>
+                        <div className="text-[9px] text-slate-400 font-medium leading-none">
+                          {dateString}
+                        </div>
+                      </div>
+                    )}
+                    <div className="absolute top-1 right-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping opacity-75"></div>
+                    <div className="absolute bottom-0.5 right-1 text-[7px] text-slate-500 font-sans opacity-60 font-semibold">
+                      240×135
+                    </div>
+                  </div>
+
+                  {/* Rotary Adjustment Knob */}
+                  <div
+                    style={{
+                      left: '900px',
+                      top: '-18px',
+                    }}
+                    onClick={handleKnobClick}
+                    onWheel={handleKnobWheel}
+                    className="absolute z-30 flex flex-col items-center justify-center cursor-pointer group"
+                    title={lang === 'tr' ? 'Döndürmeli Ses / Mod Ayar Düğmesi (Tıklayın veya kaydırın)' : 'Rotary Volume / Mode Knob (Click or scroll)'}
+                  >
+                    {/* Metallic Outer Ring with Glow */}
+                    <div className="relative w-11 h-11 rounded-full bg-gradient-to-br from-slate-600 via-slate-800 to-slate-950 p-1 border-2 border-slate-600 group-hover:border-cyan-400 shadow-lg shadow-black transition-all flex items-center justify-center">
+                      {/* Rotatable Knob Body */}
+                      <div
+                        style={{ transform: `rotate(${knobRotation}deg)` }}
+                        className="w-full h-full rounded-full bg-gradient-to-tr from-slate-900 via-slate-800 to-slate-700 border border-slate-600/80 shadow-inner flex items-center justify-center relative transition-transform duration-150 ease-out"
+                      >
+                        {/* Indicator Notch */}
+                        <div className="absolute top-1 w-1 h-3 bg-cyan-400 rounded-full shadow-sm shadow-cyan-400" />
+                        {/* Center Metallic Dot */}
+                        <div className="w-3.5 h-3.5 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 border border-slate-600 flex items-center justify-center">
+                          <div className="w-1.5 h-1.5 rounded-full bg-cyan-500/60" />
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[8px] font-mono text-slate-400 mt-0.5 font-bold tracking-tighter opacity-80 group-hover:text-cyan-300">
+                      KNOB
+                    </span>
+                  </div>
+                </>
+              )}
               {rowKeys.map((key) => {
                 const isSelected = selectedKeys.has(key.code);
                 const color = getKeyColor(key);

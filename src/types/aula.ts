@@ -23,7 +23,9 @@ export type LightingModeId =
 export interface LightingModeInfo {
   id: LightingModeId;
   name: string;
+  nameTr?: string;
   description: string;
+  descriptionTr?: string;
   hasColor: boolean;
   hasSpeed: boolean;
   hasDirection: boolean;
