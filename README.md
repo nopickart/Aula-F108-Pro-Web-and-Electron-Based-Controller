@@ -1,3 +1,5 @@
+<img width="1282" height="913" alt="image" src="https://github.com/user-attachments/assets/2975652b-251c-40b2-82d9-e64b5fbbe835" />
+<img width="1236" height="490" alt="image" src="https://github.com/user-attachments/assets/155ad4d8-4e98-4951-9007-26472143f1ba" />
 # Aula F108 Pro Mechanical Keyboard Controller & Studio
 
 Aula F108 Pro mekanik klavye için geliştirilmiş; arka aydınlatma modları, tuş başına özel RGB, tuş eşleme (remap), 240×135 TFT LCD ekran görsel/GIF yükleme ve donanımsal RTC saat senkronizasyonu sağlayan açık kaynaklı, bağımsız kontrol yazılımı.
