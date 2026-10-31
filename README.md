@@ -71,6 +71,11 @@ Derleme tamamlandığında çıktılar **`release/`** klasöründe oluşturulur:
 2. Dosyaya sağ tıklayın: **Özellikler (Properties) → İzinler (Permissions) → "Dosyayı bir program gibi çalıştırmaya izin ver" (Allow executing file as program)** kutucuğunu işaretleyin (veya terminalden `chmod +x ~/Desktop/*.AppImage`).
 3. **Simgeye çift tıklayın**, uygulama yerel ve bağımsız bir masaüstü penceresinde açılacaktır!
 
+> 💡 **İpucu:** Modern Linux dağıtımlarında (Ubuntu 24.04, Arch Linux vb.) sisteminizde `libfuse2` bulunmuyorsa:
+> - Ubuntu/Debian: `sudo apt install libfuse2`
+> - Arch Linux: `sudo pacman -S fuse2`
+> - Veya parametresiz çalıştırmak için: `./release/*.AppImage --appimage-extract-and-run`
+
 Debian/Ubuntu/Linux Mint'e sistem uygulaması olarak kurmak isterseniz:
 ```bash
 sudo dpkg -i release/aula-f108-pro_1.0.0_amd64.deb

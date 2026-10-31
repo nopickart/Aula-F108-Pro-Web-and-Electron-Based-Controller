@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "description": "Aula F108 Pro Mechanical Keyboard Configurator and Protocol Studio",
+  "homepage": "https://github.com/nopickart/f108-pro-web-gui-app",
   "author": {
     "name": "Aula F108 Community",
     "email": "hebelemocha@gmail.com"

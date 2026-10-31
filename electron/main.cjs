@@ -1,6 +1,13 @@
 const { app, BrowserWindow, session } = require('electron');
 const path = require('path');
 
+// Disable GPU sandbox / Linux user-namespace sandbox issues on modern Linux (Ubuntu 24.04, Arch, Debian)
+if (process.platform === 'linux') {
+  app.commandLine.appendSwitch('no-sandbox');
+  app.commandLine.appendSwitch('disable-gpu-sandbox');
+}
+app.commandLine.appendSwitch('enable-features', 'WebHID');
+
 let mainWindow = null;
 
 // Target Aula F108 Pro VID & PID
@@ -8,6 +15,10 @@ const AULA_VID = 0x0c45;
 const AULA_PID = 0x800a;
 
 function createWindow() {
+  const appPath = app.getAppPath();
+  const iconPath = path.join(appPath, 'public', 'icon.svg');
+  const preloadPath = path.join(appPath, 'electron', 'preload.cjs');
+
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 880,
@@ -15,12 +26,12 @@ function createWindow() {
     minHeight: 700,
     backgroundColor: '#020617',
     title: 'Aula F108 Pro Keyboard Controller',
-    icon: path.join(__dirname, '../public/icon.svg'),
+    icon: iconPath,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.cjs'),
-      sandbox: true,
+      preload: preloadPath,
+      sandbox: false,
     },
     autoHideMenuBar: true,
   });
@@ -45,7 +56,7 @@ function createWindow() {
   });
 
   // 3. Automatically select the Aula F108 Pro device when WebHID requests pairing
-  mainWindow.webContents.session.on('select-hid-device', (event, details, callback) => {
+  ses.on('select-hid-device', (event, details, callback) => {
     event.preventDefault();
     if (details.deviceList && details.deviceList.length > 0) {
       // Find Aula device if present
@@ -63,13 +74,20 @@ function createWindow() {
     callback('');
   });
 
+  // Handle load errors
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    console.error('[Electron] Failed to load:', errorCode, errorDescription, validatedURL);
+  });
+
   // Load production build or dev server
-  const isDev = process.env.NODE_ENV === 'development' || process.argv.includes('--dev');
+  const isDev = !app.isPackaged && (process.env.NODE_ENV === 'development' || process.argv.includes('--dev'));
   if (isDev) {
     mainWindow.loadURL('http://localhost:3000');
-    mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+    const indexPath = path.join(appPath, 'dist', 'index.html');
+    mainWindow.loadFile(indexPath).catch((err) => {
+      console.error('[Electron] Failed to load index.html:', err);
+    });
   }
 
   mainWindow.on('closed', () => {
