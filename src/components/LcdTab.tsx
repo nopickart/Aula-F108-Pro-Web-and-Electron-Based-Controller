@@ -9,8 +9,6 @@ import {
   Pause,
   SkipBack,
   SkipForward,
-  Copy,
-  Check,
   ShieldAlert,
   ShieldCheck,
   RotateCcw,
@@ -146,7 +144,6 @@ export const LcdTab: React.FC<LcdTabProps> = ({
   const [pageCount, setPageCount] = useState<number>(0);
   const [frameCount, setFrameCount] = useState<number>(1);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
-  const [copiedClock, setCopiedClock] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -493,8 +490,8 @@ export const LcdTab: React.FC<LcdTabProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* LCD Clock Sync Section */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+          <div className="flex items-center justify-between pb-3.5 border-b border-slate-800/80">
             <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
               <Clock className="w-4 h-4 text-cyan-400" /> {t('clockSyncTitle')}
             </h3>
@@ -503,51 +500,34 @@ export const LcdTab: React.FC<LcdTabProps> = ({
             </span>
           </div>
 
-          <p className="text-xs text-slate-400 leading-relaxed">
-            {t('clockSyncDesc')}
-          </p>
+          <div className="flex-1 flex flex-col items-center justify-center text-center py-6 sm:py-8 space-y-6 w-full">
+            <p className="text-xs text-slate-400 leading-relaxed max-w-sm mx-auto">
+              {t('clockSyncDesc')}
+            </p>
 
-          {/* Clock Display Card */}
-          <div className="bg-slate-950 rounded-xl p-5 border border-slate-800 flex flex-col items-center justify-center text-center">
-            <div className="text-3xl font-mono font-bold text-cyan-400 tracking-widest drop-shadow-[0_0_12px_rgba(6,182,212,0.4)]">
-              {currentTime.toLocaleTimeString([], { hour12: false })}
+            {/* Clock Display Card */}
+            <div className="w-full max-w-sm bg-slate-950 rounded-2xl p-6 border border-slate-800/80 flex flex-col items-center justify-center text-center shadow-inner">
+              <div className="text-3xl sm:text-4xl font-mono font-bold text-cyan-400 tracking-widest drop-shadow-[0_0_16px_rgba(6,182,212,0.45)]">
+                {currentTime.toLocaleTimeString([], { hour12: false })}
+              </div>
+              <div className="text-xs text-slate-400 font-medium mt-2">
+                {currentTime.toLocaleDateString(lang === 'tr' ? 'tr-TR' : 'en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </div>
             </div>
-            <div className="text-xs text-slate-400 font-medium mt-1">
-              {currentTime.toLocaleDateString(lang === 'tr' ? 'tr-TR' : 'en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </div>
-          </div>
 
-          <button
-            onClick={() => onSyncClock(new Date())}
-            disabled={isBusy}
-            className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 disabled:opacity-60 text-slate-950 font-bold text-sm shadow-lg shadow-cyan-500/20 transition-all cursor-pointer"
-          >
-            <Clock className={`w-4 h-4 ${isBusy ? 'animate-spin' : ''}`} />
-            <span>{isBusy ? t('clockSyncing') : t('syncClockBtn')}</span>
-          </button>
-
-          {/* Linux CLI Box */}
-          <div className="bg-slate-950 rounded-xl p-3 border border-slate-800">
-            <div className="flex items-center justify-between mb-1.5 text-[11px] text-slate-400">
-              <span className="font-mono">{t('linuxCliCommand')}</span>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText('f108-pro clock');
-                  setCopiedClock(true);
-                  setTimeout(() => setCopiedClock(false), 2000);
-                }}
-                className="flex items-center gap-1 text-cyan-400 hover:text-cyan-300 font-medium cursor-pointer"
-              >
-                {copiedClock ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                {copiedClock ? t('copySuccess') : t('copy')}
-              </button>
-            </div>
-            <code className="text-xs font-mono text-cyan-300">f108-pro clock</code>
+            <button
+              onClick={() => onSyncClock(new Date())}
+              disabled={isBusy}
+              className="w-full max-w-sm flex items-center justify-center space-x-2 py-3 px-5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 disabled:opacity-60 text-slate-950 font-bold text-sm shadow-lg shadow-cyan-500/20 transition-all cursor-pointer"
+            >
+              <Clock className={`w-4 h-4 ${isBusy ? 'animate-spin' : ''}`} />
+              <span>{isBusy ? t('clockSyncing') : t('syncClockBtn')}</span>
+            </button>
           </div>
         </div>
 
