@@ -4,7 +4,6 @@
 
 Aula F108 Pro mekanik klavye için geliştirilmiş; arka aydınlatma modları, tuş başına özel RGB, tuş eşleme (remap), 240×135 TFT LCD ekran görsel/GIF yükleme ve donanımsal RTC saat senkronizasyonu sağlayan açık kaynaklı, bağımsız kontrol yazılımı.
 
-Herhangi bir harici Google servisine veya uzak sunucuya ihtiyaç duymaz; yerel ortamınızda %100 çevrimdışı çalışır.
 
 ---
 
