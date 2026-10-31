@@ -11,7 +11,7 @@
     "preview": "vite preview --host 0.0.0.0 --port 3000",
     "electron": "electron .",
     "electron:dev": "vite build && electron .",
-    "dist:linux": "npm run build && npx electron-builder --linux AppImage deb",
+    "dist:linux": "npm rebuild esbuild 2>/dev/null || true; npm run build && npx electron-builder --linux AppImage deb",
     "dist:win": "npm run build && npx electron-builder --win nsis portable",
     "dist:mac": "npm run build && npx electron-builder --mac dmg",
     "dist": "npm run build && npx electron-builder"

@@ -2,7 +2,7 @@
 
 Aula F108 Pro mekanik klavye için geliştirilmiş; arka aydınlatma modları, tuş başına özel RGB, tuş eşleme (remap), 240×135 TFT LCD ekran görsel/GIF yükleme ve donanımsal RTC saat senkronizasyonu sağlayan açık kaynaklı, bağımsız kontrol yazılımı.
 
-Herhangi bir harici sunucuya veya bulut servisine ihtiyaç duymaz; yerel ortamda %100 çevrimdışı çalışır.
+Herhangi bir harici Google servisine veya uzak sunucuya ihtiyaç duymaz; yerel ortamınızda %100 çevrimdışı çalışır.
 
 ---
 
@@ -26,7 +26,7 @@ echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="0c45", ATTR{idProduct}=="800a", MODE="0
 sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
 
-> **Not:** Klavyeyi USB kablosuyla bilgisayara bağladığınızdan emin olun. 2.4G kablosuz dongle veya Bluetooth üzerinden HID yapılandırma komutları donanım gereği kısıtlı olabilir.
+> **Önemli:** Klavyeyi USB Type-C kablosuyla bilgisayara bağladığınızdan emin olun. 2.4G kablosuz veya Bluetooth modunda HID yapılandırma komutları donanımsal olarak kısıtlı olabilir.
 
 ---
 
@@ -36,7 +36,7 @@ Uygulama, bağımsız bir masaüstü uygulaması olarak doğrudan işletim siste
 
 ### Ön Gereksinimler
 
-- [Node.js](https://nodejs.org/) (Sürüm 18 veya üstü; Node 20/22 önerilir)
+- [Node.js](https://nodejs.org/) (Sürüm 18 veya üstü; Node 20 / 22 / 24)
 - `npm` paket yöneticisi
 
 ```bash
@@ -55,7 +55,7 @@ npm install
 Linux masaüstünüzde **çift tıklayarak çalıştırmak** için `.AppImage` ve sisteminize kurmak için `.deb` paketi üretir:
 
 ```bash
-# Electron derleme araçlarını yükleyin (ilk seferde)
+# Electron derleme araçlarını yükleyin
 npm install -D electron electron-builder
 
 # Linux paketlerini derleyin
@@ -105,12 +105,30 @@ npm run dist:mac
 
 ---
 
+## ⚠️ Sık Karşılaşılan Kurulum Uyarıları & Çözümleri (Troubleshooting)
+
+### 1. `npm warn install-scripts 2 packages had install scripts blocked` Uyarısı
+Modern Node.js ve npm (özellikle npm v10/v11 veya `allowScripts` güvenlik ayarı aktif olan ortamlarda) kurulum sırasında bazı paketlerin postinstall betiklerini durdurabilir:
+- **`esbuild`**: Vite'ın derleyicisidir. Eğer bu betik engellenmişse `esbuild: not found` hatası almamak için terminalde şu komutu çalıştırmanız yeterlidir:
+  ```bash
+  npm rebuild esbuild
+  # veya
+  npm install --foreground-scripts
+  ```
+  *(Not: Projedeki `.npmrc` yapılandırması ve `npm run dist:linux` betiği bu işlemi otomatik olarak da tetikler).*
+- **`electron-winstaller`**: Bu paket sadece Windows üzerinde `.exe` oluşturmak içindir. **Linux'ta `.AppImage` veya `.deb` derlerken hiçbir şekilde kullanılmaz.** Bu uyarı Linux derlemesini hiçbir şekilde etkilemez, güvenle yok sayabilirsiniz.
+
+### 2. `15 moderate severity vulnerabilities` Uyarısı
+Bu uyarılar, `electron-builder` paketleme aracının kendi iç geliştirme bağımlılıklarından kaynaklanan genel `npm audit` bildirimleridir. Uygulamanın çalışma kodunda yer almaz, derleme sürecini veya Linux güvenliğini etkilemez.
+
+---
+
 ## 💻 Geliştirme (Development)
 
 Yerel ortamınızda kaynak kodları düzenlerken test etmek için:
 
 ```bash
-# Web arayüzü olarak başlatma:
+# Web arayüzü olarak tarayıcıda başlatma:
 npm run dev
 
 # Masaüstü (Electron) penceresinde anında test etme:
