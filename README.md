@@ -38,6 +38,11 @@ Uygulama, bağımsız bir masaüstü uygulaması olarak doğrudan işletim siste
 
 - [Node.js](https://nodejs.org/) (Sürüm 18 veya üstü; Node 20 / 22 / 24)
 - `npm` paket yöneticisi
+- **Linux için FUSE 2 Kütüphanesi (`fuse2` / `libfuse2`)**: AppImage paketlerinin çift tıklanarak doğrudan çalışabilmesi için sisteminizde `fuse2` paketinin kurulu olması **zorunludur**:
+  - **Arch Linux / Manjaro:** `sudo pacman -S fuse2`
+  - **Ubuntu / Debian / Linux Mint:** `sudo apt install libfuse2`
+  - **Fedora / RHEL:** `sudo dnf install fuse-libs`
+  - **openSUSE:** `sudo zypper install libfuse2`
 
 ```bash
 # Projeyi klonlayın ve klasöre girin
@@ -71,10 +76,12 @@ Derleme tamamlandığında çıktılar **`release/`** klasöründe oluşturulur:
 2. Dosyaya sağ tıklayın: **Özellikler (Properties) → İzinler (Permissions) → "Dosyayı bir program gibi çalıştırmaya izin ver" (Allow executing file as program)** kutucuğunu işaretleyin (veya terminalden `chmod +x ~/Desktop/*.AppImage`).
 3. **Simgeye çift tıklayın**, uygulama yerel ve bağımsız bir masaüstü penceresinde açılacaktır!
 
-> 💡 **İpucu:** Modern Linux dağıtımlarında (Ubuntu 24.04, Arch Linux vb.) sisteminizde `libfuse2` bulunmuyorsa:
-> - Ubuntu/Debian: `sudo apt install libfuse2`
-> - Arch Linux: `sudo pacman -S fuse2`
-> - Veya parametresiz çalıştırmak için: `./release/*.AppImage --appimage-extract-and-run`
+> ⚠️ **Zorunlu Gereksinim (FUSE 2):**
+> Linux sistemlerinde AppImage paketlerinin çift tıklanarak açılabilmesi için `fuse2` paketinin kurulu olması şarttır:
+> - **Arch Linux:** `sudo pacman -S fuse2`
+> - **Ubuntu / Debian:** `sudo apt install libfuse2`
+> - **Fedora:** `sudo dnf install fuse-libs`
+> *(FUSE yüklemeden doğrudan çalıştırmak isterseniz: `./release/*.AppImage --appimage-extract-and-run`)*
 
 Debian/Ubuntu/Linux Mint'e sistem uygulaması olarak kurmak isterseniz:
 ```bash
