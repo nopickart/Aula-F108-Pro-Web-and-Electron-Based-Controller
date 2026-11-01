@@ -162,6 +162,16 @@ Derlenen dosyalar **`dist/`** klasöründe yer alır. `dist/` içeriğini herhan
 
 ---
 
+## 🙏 Teşekkürler
+
+Bu proje, [Parsia Hakimian](https://github.com/parsiya)'ın Aula F108 Pro
+için yaptığı tersine mühendislik çalışmasına dayanır (HID protokolü,
+Ghidra analizi, LCD yükleme araştırması). Protokol dokümanları
+[`ai-docs/`](./ai-docs) klasöründe onun çalışmasından alınmıştır.
+
+Orijinal proje: [parsiya/f108-pro](https://github.com/parsiya/f108-pro)
+
+
 ## 📄 Lisans
 
 Bu proje açık kaynaklıdır. Detaylar için [LICENSE](LICENSE) dosyasına göz atabilirsiniz.
