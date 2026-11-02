@@ -3,6 +3,9 @@ import { ALL_KEYS, LIGHTING_MODES, getLightingModeDetails } from '../lib/aula-co
 import { KeyDef, LightingConfig, LcdVisualState } from '../types/aula';
 import { Language, getTranslation } from '../lib/i18n';
 import { Sparkles } from 'lucide-react';
+import { calculateMatrixRainKeyColor } from '../lib/matrix-rain';
+import { calculateColourfulKeyColor } from '../lib/colourful-wave';
+import { calculateOutwardKeyColor } from '../lib/outward-wave';
 
 interface VirtualKeyboardProps {
   selectedKeys: Set<string>;
@@ -62,7 +65,7 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
   // Real-time animation clock for animated backlight modes
   const [animTime, setAnimTime] = useState<number>(0);
   const animFrameRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number>(Date.now());
+  const startTimeRef = useRef<number>(typeof performance !== 'undefined' ? performance.now() : 0);
 
   // Individual key mouse & keyboard interaction tracker (for SingleOn, SingleOff, etc.)
   const keyInteractionsRef = useRef<Map<string, number>>(new Map());
@@ -71,7 +74,8 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
 
   // Trigger interaction timestamp for a specific key
   const triggerKeyInteraction = useCallback((keyCode: string) => {
-    const nowSec = (performance.now() - startTimeRef.current) / 1000;
+    const nowMs = typeof performance !== 'undefined' ? performance.now() : 0;
+    const nowSec = (nowMs - startTimeRef.current) / 1000;
     keyInteractionsRef.current.set(keyCode, nowSec);
   }, []);
 
@@ -320,55 +324,14 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
         return `hsl(${Math.round((keyHue % 360 + 360) % 360)}, 100%, ${lightness}%)`;
       }
 
-      // 5. Falling (Matrix Yağmuru - LEDs cascade down row by row sequentially from top to bottom)
+      // 5. Falling (Matrix Yağmuru - Digital rain cascading top to bottom in diverse column lanes & cyberpunk colors)
       if (lightMode === 5) {
-        const colIdx = Math.round(key.col);
-        // Stagger column drop start times across columns 0 to 22
-        const colDelay = (colIdx * 1.618) % 6.0;
-        const speed = speedMult * 3.6;
-        const cycleLength = 8.5; // distance from top (-1.5) down to bottom (7.0)
-        const dropY = ((t * speed + colDelay) % cycleLength) - 1.5;
-
-        // Vertical distance from drop head to key row (0 to 5)
-        const dy = dropY - key.row;
-
-        let intensity = 0.04;
-        let isHead = false;
-
-        if (dy >= 0 && dy < 2.8) {
-          if (dy < 0.55) {
-            intensity = 1.0;
-            isHead = true;
-          } else {
-            // Fading trail gliding down behind the head
-            intensity = Math.pow(1 - (dy - 0.55) / 2.25, 1.3);
-          }
-        }
-
-        // Rainbow / Colorful Mode
-        if (isColorful) {
-          const hue = (colIdx * 20) % 360;
-          if (isHead) {
-            return `hsl(${hue}, 100%, ${Math.round(75 * brightnessFactor)}%)`;
-          }
-          return `hsl(${hue}, 100%, ${Math.round((10 + 50 * intensity) * brightnessFactor)}%)`;
-        }
-
-        // Standard Matrix mode: Bright leading head & phosphor trailing LEDs sliding down row by row
-        if (isHead) {
-          const rHead = Math.min(255, Math.round((baseR * 0.4 + 180) * brightnessFactor));
-          const gHead = Math.min(255, Math.round((baseG * 0.4 + 200) * brightnessFactor));
-          const bHead = Math.min(255, Math.round((baseB * 0.4 + 180) * brightnessFactor));
-          return `rgb(${rHead}, ${gHead}, ${bHead})`;
-        }
-
-        return blendColor(intensity);
+        return calculateMatrixRainKeyColor(key, t, lightingConfig);
       }
 
-      // 6. Colourful (Renkli Ahenk - Dynamic Spectrum Wave)
+      // 6. Colourful (Renkli Ahenk - Right-to-Left randomized key color transitions)
       if (lightMode === 6) {
-        const hue = (t * speedMult * 55 + key.col * 16 + key.row * 24) % 360;
-        return blendColor(1, hue);
+        return calculateColourfulKeyColor(key, t, lightingConfig);
       }
 
       // 7. Breath (Nefes Alma - Smooth Sinusoidal Breathing, cycles to a new color each breath in colorful mode)
@@ -394,15 +357,9 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
         return blendColor(1, hue);
       }
 
-      // 9. Outward (Dışa Yayılma - Radial Expansion from Center)
+      // 9. Outward (Dışa Yayılma - 70% slower radial wave, zero dimming in RGB, random color sweeping over background)
       if (lightMode === 9) {
-        const dx = key.col - CENTER_COL;
-        const dy = (key.row - CENTER_ROW) * 1.8;
-        const dist = Math.hypot(dx, dy);
-        const wave = Math.sin(dist * 0.85 - t * speedMult * 4.5);
-        const intensity = Math.pow((wave + 1) / 2, 2.5);
-        const hue = isColorful ? (dist * 25 + t * 35) % 360 : undefined;
-        return blendColor(0.1 + 0.9 * intensity, hue);
+        return calculateOutwardKeyColor(key, t, lightingConfig);
       }
 
       // 10. Scrolling (Süzülen Dalga - Vertical Wave: Top to Bottom)
@@ -764,8 +721,9 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
                       left: `${leftPx}px`,
                       width: `${widthPx}px`,
                       height: `${heightPx}px`,
+                      borderColor: isAnimatedBacklight && color ? color : undefined,
                     }}
-                    className={`absolute top-0 rounded-md flex flex-col items-center justify-center cursor-pointer text-slate-200 border ${
+                    className={`absolute top-0 rounded-md flex flex-col items-center justify-center cursor-pointer text-slate-200 border bg-slate-900/90 ${
                       isAnimatedBacklight ? 'transition-none' : 'transition-all'
                     } ${
                       isSelected
@@ -775,7 +733,7 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
                   >
                     {/* Key LED Backlight Glow */}
                     <div
-                      className={`absolute inset-0 rounded-md opacity-45 blur-[3px] pointer-events-none ${
+                      className={`absolute inset-0 rounded-md opacity-60 blur-[3px] pointer-events-none ${
                         isAnimatedBacklight ? 'transition-none' : 'transition-colors'
                       }`}
                       style={{ backgroundColor: color }}
@@ -783,10 +741,10 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
 
                     {/* Under-key glow bottom line */}
                     <div
-                      className={`absolute bottom-1 inset-x-1.5 h-0.5 rounded-full opacity-90 ${
+                      className={`absolute bottom-1 inset-x-1.5 h-1 rounded-full opacity-95 ${
                         isAnimatedBacklight ? 'transition-none' : 'transition-colors'
                       }`}
-                      style={{ backgroundColor: color }}
+                      style={{ backgroundColor: color, boxShadow: `0 0 6px ${color}` }}
                     />
 
                     {/* Keycap Body */}
