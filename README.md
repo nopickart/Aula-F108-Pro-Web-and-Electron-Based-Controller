@@ -30,6 +30,10 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 > **Important:** Make sure you connect the keyboard to the computer using a USB Type-C cable. HID configuration commands might be hardware-restricted in 2.4G wireless or Bluetooth mode.
 
 ---
+For Try:
+
+https://nopickart.github.io/Aula-F108-Pro-Web-and-Electron-Based-Controller/
+
 
 ## 🛠️ Desktop Build
 
