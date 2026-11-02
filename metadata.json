@@ -1,7 +1,0 @@
-{
-  "name": "Aula F108 Pro Keyboard Configurator",
-  "description": "Web-based configurator and protocol studio for the Aula F108 Pro mechanical keyboard with backlight effects, per-key RGB layout editor, key remapping, LCD screen sync, and WebHID control.",
-  "version": "1.0.0",
-  "permissions": [],
-  "capabilities": []
-}
