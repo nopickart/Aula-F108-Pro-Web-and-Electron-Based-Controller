@@ -2,176 +2,194 @@
 <img width="1236" height="490" alt="image" src="https://github.com/user-attachments/assets/155ad4d8-4e98-4951-9007-26472143f1ba" />
 # Aula F108 Pro Mechanical Keyboard Controller & Studio
 
-Aula F108 Pro mekanik klavye için geliştirilmiş; arka aydınlatma modları, tuş başına özel RGB, tuş eşleme (remap), 240×135 TFT LCD ekran görsel/GIF yükleme ve donanımsal RTC saat senkronizasyonu sağlayan açık kaynaklı, bağımsız kontrol yazılımı.
-
-
----
-
-## 🚀 Özellikler
-
-- **20 Farklı Donanımsal Işık Modu**: Renk, parlaklık, animasyon hızı ve yön seçimi.
-- **Tuş Başına RGB (Per-Key RGB)**: 108 tuşu bağımsız renklendirme, hazır şablonlar (WASD, Cyberpunk vb.) ve YAML içe/dışa aktarma.
-- **Tuş Yeniden Eşleme (Remap)**: Normal katman (`04 11`) ve FN katmanı (`04 27`) için tuş takası, multimedya kontrolleri ve fare eylemleri.
-- **240×135 TFT LCD Ekran & Animasyon Stüdyosu**: Statik görseller (PNG, JPG) veya animasyonlu GIF'leri 141 güvenli kare sınırı dahilinde RGB565 formatına dönüştürüp klavyeye aktarma.
-- **Donanımsal RTC Saat Senkronizasyonu**: Tek tıkla bilgisayar saatini klavyenin dahili saatine eşitleme (`04 28 Protocol`).
-- **HID Paket Denetleyicisi**: Gönderilen ve alınan tüm 64 baytlık ham USB raporlarını canlı izleme.
+Open-source, independent control software developed for the Aula F108 Pro mechanical keyboard; providing backlighting modes, per-key custom RGB, key remapping, 240×135 TFT LCD screen image/GIF upload, and hardware RTC clock synchronization.
 
 ---
 
-## 🐧 Linux USB İzinleri (Udev Kuralı)
+## 🚀 Features
 
-Linux altında WebHID / USB cihazına `sudo` (root) yetkisi olmadan doğrudan erişebilmek için aşağıdaki udev kuralını terminalde bir defa çalıştırmanız gerekir:
+* **20 Different Hardware Lighting Modes**: Color, brightness, animation speed, and direction selection.
+* **Per-Key RGB**: Independent coloring for 108 keys, ready-made templates (WASD, Cyberpunk, etc.), and YAML import/export.
+* **Key Remapping (Remap)**: Key swapping, multimedia controls, and mouse actions for the Normal layer (`04 11`) and FN layer (`04 27`).
+* **240×135 TFT LCD Screen & Animation Studio**: Converting static images (PNG, JPG) or animated GIFs into RGB565 format within a safe 141-frame limit and transferring them to the keyboard.
+* **Hardware RTC Clock Synchronization**: One-click syncing of the computer clock to the keyboard's internal clock (`04 28 Protocol`).
+* **HID Packet Inspector**: Live monitoring of all sent and received 64-byte raw USB reports.
+
+---
+
+## 🐧 Linux USB Permissions (Udev Rule)
+
+To directly access the WebHID / USB device under Linux without `sudo` (root) privileges, you need to run the following udev rule once in the terminal:
 
 ```bash
 echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="0c45", ATTR{idProduct}=="800a", MODE="0666"' | sudo tee /etc/udev/rules.d/99-aula.rules
 sudo udevadm control --reload-rules && sudo udevadm trigger
+
 ```
 
-> **Önemli:** Klavyeyi USB Type-C kablosuyla bilgisayara bağladığınızdan emin olun. 2.4G kablosuz veya Bluetooth modunda HID yapılandırma komutları donanımsal olarak kısıtlı olabilir.
+> **Important:** Make sure you connect the keyboard to the computer using a USB Type-C cable. HID configuration commands might be hardware-restricted in 2.4G wireless or Bluetooth mode.
 
 ---
 
-## 🛠️ İşletim Sistemine Göre Derleme (Desktop Build)
+## 🛠️ Desktop Build
 
-Uygulama, bağımsız bir masaüstü uygulaması olarak doğrudan işletim sisteminize göre derlenebilir.
+The application can be compiled directly for your operating system as a standalone desktop app.
 
-### Ön Gereksinimler
+### Prerequisites
 
-- [Node.js](https://nodejs.org/) (Sürüm 18 veya üstü; Node 20 / 22 / 24)
-- `npm` paket yöneticisi
-- **Linux için FUSE 2 Kütüphanesi (`fuse2` / `libfuse2`)**: AppImage paketlerinin çift tıklanarak doğrudan çalışabilmesi için sisteminizde `fuse2` paketinin kurulu olması **zorunludur**:
-  - **Arch Linux / Manjaro:** `sudo pacman -S fuse2`
-  - **Ubuntu / Debian / Linux Mint:** `sudo apt install libfuse2`
-  - **Fedora / RHEL:** `sudo dnf install fuse-libs`
-  - **openSUSE:** `sudo zypper install libfuse2`
+* [Node.js](https://nodejs.org/) (Version 18 or higher; Node 20 / 22 / 24)
+* `npm` package manager
+* **FUSE 2 Library for Linux (`fuse2` / `libfuse2`)**: It is **mandatory** to have the `fuse2` package installed on your system for AppImage packages to run directly by double-clicking:
+* **Arch Linux / Manjaro:** `sudo pacman -S fuse2`
+* **Ubuntu / Debian / Linux Mint:** `sudo apt install libfuse2`
+* **Fedora / RHEL:** `sudo dnf install fuse-libs`
+* **openSUSE:** `sudo zypper install libfuse2`
+
+
 
 ```bash
-# Projeyi klonlayın ve klasöre girin
+# Clone the project and enter the directory
 git clone https://github.com/nopickart/f108-pro-web-gui-app.git
 cd f108-pro-web-gui-app
 
-# Bağımlılıkları yükleyin
+# Install dependencies
 npm install
+
 ```
 
 ---
 
-### 1. Linux için Derleme (.AppImage & .deb)
+### 1. Build for Linux (.AppImage & .deb)
 
-Linux masaüstünüzde **çift tıklayarak çalıştırmak** için `.AppImage` ve sisteminize kurmak için `.deb` paketi üretir:
+Generates an `.AppImage` for **double-click execution** on your Linux desktop and a `.deb` package to install on your system:
 
 ```bash
-# Electron derleme araçlarını yükleyin
+# Install Electron build tools
 npm install -D electron electron-builder
 
-# Linux paketlerini derleyin
+# Build Linux packages
 npm run dist:linux
+
 ```
 
-Derleme tamamlandığında çıktılar **`release/`** klasöründe oluşturulur:
-- **`release/Aula F108 Pro Controller-1.0.0.AppImage`**
-- **`release/aula-f108-pro_1.0.0_amd64.deb`**
+When the build is complete, the outputs will be generated in the **`release/`** folder:
 
-#### Masaüstünde Çift Tıklayarak Çalıştırma:
-1. `release/` klasöründeki `.AppImage` dosyasını Masaüstünüze taşıyın.
-2. Dosyaya sağ tıklayın: **Özellikler (Properties) → İzinler (Permissions) → "Dosyayı bir program gibi çalıştırmaya izin ver" (Allow executing file as program)** kutucuğunu işaretleyin (veya terminalden `chmod +x ~/Desktop/*.AppImage`).
-3. **Simgeye çift tıklayın**, uygulama yerel ve bağımsız bir masaüstü penceresinde açılacaktır!
+* **`release/Aula F108 Pro Controller-1.0.0.AppImage`**
+* **`release/aula-f108-pro_1.0.0_amd64.deb`**
 
-> ⚠️ **Zorunlu Gereksinim (FUSE 2):**
-> Linux sistemlerinde AppImage paketlerinin çift tıklanarak açılabilmesi için `fuse2` paketinin kurulu olması şarttır:
-> - **Arch Linux:** `sudo pacman -S fuse2`
-> - **Ubuntu / Debian:** `sudo apt install libfuse2`
-> - **Fedora:** `sudo dnf install fuse-libs`
-> *(FUSE yüklemeden doğrudan çalıştırmak isterseniz: `./release/*.AppImage --appimage-extract-and-run`)*
+#### Running by Double-Clicking on the Desktop:
 
-Debian/Ubuntu/Linux Mint'e sistem uygulaması olarak kurmak isterseniz:
+1. Move the `.AppImage` file from the `release/` folder to your Desktop.
+2. Right-click the file: **Properties → Permissions → Check the "Allow executing file as program"** box (or run `chmod +x ~/Desktop/*.AppImage` from the terminal).
+3. **Double-click the icon**, the application will open in a native and standalone desktop window!
+
+> ⚠️ **Mandatory Requirement (FUSE 2):**
+> To open AppImage packages by double-clicking on Linux systems, the `fuse2` package must be installed:
+> * **Arch Linux:** `sudo pacman -S fuse2`
+> * **Ubuntu / Debian:** `sudo apt install libfuse2`
+> * **Fedora:** `sudo dnf install fuse-libs`
+> *(If you want to run it directly without installing FUSE: `./release/*.AppImage --appimage-extract-and-run`)*
+> 
+> 
+
+If you want to install it as a system application on Debian/Ubuntu/Linux Mint:
+
 ```bash
 sudo dpkg -i release/aula-f108-pro_1.0.0_amd64.deb
+
 ```
 
 ---
 
-### 2. Windows için Derleme (.exe Kurulum & Portable)
+### 2. Build for Windows (.exe Setup & Portable)
 
-Windows için tek tıklanabilir kurulum sihirbazı (`Setup.exe`) ve kuruluma gerek olmadan çift tıklanan taşınabilir (`portable.exe`) paket üretir:
+Generates a one-click setup wizard (`Setup.exe`) and a double-clickable portable (`portable.exe`) package that requires no installation for Windows:
 
 ```bash
 npm run dist:win
+
 ```
 
-Çıktılar **`release/`** klasöründe yer alır:
-- **`release/Aula F108 Pro Controller Setup 1.0.0.exe`**
-- **`release/Aula F108 Pro Controller 1.0.0.exe`** (Portable)
+Outputs are located in the **`release/`** folder:
+
+* **`release/Aula F108 Pro Controller Setup 1.0.0.exe`**
+* **`release/Aula F108 Pro Controller 1.0.0.exe`** (Portable)
 
 ---
 
-### 3. macOS için Derleme (.dmg)
+### 3. Build for macOS (.dmg)
 
-macOS için doğrudan sürücüye atıp kurabileceğiniz disk imajı (`.dmg`) üretir:
+Generates a disk image (`.dmg`) for macOS that you can directly mount and install:
 
 ```bash
 npm run dist:mac
+
 ```
 
-Çıktı **`release/`** klasöründe:
-- **`release/Aula F108 Pro Controller-1.0.0.dmg`**
+Output is in the **`release/`** folder:
+
+* **`release/Aula F108 Pro Controller-1.0.0.dmg`**
 
 ---
 
-## ⚠️ Sık Karşılaşılan Kurulum Uyarıları & Çözümleri (Troubleshooting)
+## ⚠️ Troubleshooting
 
-### 1. `npm warn install-scripts 2 packages had install scripts blocked` Uyarısı
-Modern Node.js ve npm (özellikle npm v10/v11 veya `allowScripts` güvenlik ayarı aktif olan ortamlarda) kurulum sırasında bazı paketlerin postinstall betiklerini durdurabilir:
-- **`esbuild`**: Vite'ın derleyicisidir. Eğer bu betik engellenmişse `esbuild: not found` hatası almamak için terminalde şu komutu çalıştırmanız yeterlidir:
-  ```bash
-  npm rebuild esbuild
-  # veya
-  npm install --foreground-scripts
-  ```
-  *(Not: Projedeki `.npmrc` yapılandırması ve `npm run dist:linux` betiği bu işlemi otomatik olarak da tetikler).*
-- **`electron-winstaller`**: Bu paket sadece Windows üzerinde `.exe` oluşturmak içindir. **Linux'ta `.AppImage` veya `.deb` derlerken hiçbir şekilde kullanılmaz.** Bu uyarı Linux derlemesini hiçbir şekilde etkilemez, güvenle yok sayabilirsiniz.
+### 1. `npm warn install-scripts 2 packages had install scripts blocked` Warning
 
-### 2. `15 moderate severity vulnerabilities` Uyarısı
-Bu uyarılar, `electron-builder` paketleme aracının kendi iç geliştirme bağımlılıklarından kaynaklanan genel `npm audit` bildirimleridir. Uygulamanın çalışma kodunda yer almaz, derleme sürecini veya Linux güvenliğini etkilemez.
+Modern Node.js and npm (especially npm v10/v11 or in environments with the `allowScripts` security setting enabled) may block postinstall scripts of certain packages during installation:
+
+* **`esbuild`**: This is Vite's compiler. If this script is blocked, simply run the following command in the terminal to avoid the `esbuild: not found` error:
+```bash
+npm rebuild esbuild
+# or
+npm install --foreground-scripts
+
+```
+
+
+*(Note: The `.npmrc` configuration in the project and the `npm run dist:linux` script also trigger this process automatically).*
+* **`electron-winstaller`**: This package is only for creating `.exe` files on Windows. **It is not used in any way when building `.AppImage` or `.deb` on Linux.** This warning does not affect the Linux build at all and can be safely ignored.
+
+### 2. `15 moderate severity vulnerabilities` Warning
+
+These warnings are generic `npm audit` notifications originating from the internal development dependencies of the `electron-builder` packaging tool. They are not part of the application's runtime code and do not affect the build process or Linux security.
 
 ---
 
-## 💻 Geliştirme (Development)
+## 💻 Development
 
-Yerel ortamınızda kaynak kodları düzenlerken test etmek için:
+To test while editing the source code in your local environment:
 
 ```bash
-# Web arayüzü olarak tarayıcıda başlatma:
+# Launch in the browser as a web interface:
 npm run dev
 
-# Masaüstü (Electron) penceresinde anında test etme:
+# Test instantly in a Desktop (Electron) window:
 npm run electron:dev
+
 ```
 
 ---
 
-## 🌐 Statik Web Sürümü Olarak Derleme
+## 🌐 Static Web Build
 
-Uygulamayı yerel bir web sunucusunda barındırmak veya Nginx/Apache üzerinden açmak isterseniz:
+If you want to host the application on a local web server or serve it via Nginx/Apache:
 
 ```bash
 npm run build
+
 ```
 
-Derlenen dosyalar **`dist/`** klasöründe yer alır. `dist/` içeriğini herhangi bir statik web sunucusuna yerleştirebilirsiniz.
+The compiled files are located in the **`dist/`** folder. You can place the contents of `dist/` into any static web server.
 
 ---
 
-## 🙏 Teşekkürler
+## 🙏 Credits
 
-Bu proje, [Parsia Hakimian](https://github.com/parsiya)'ın Aula F108 Pro
-için yaptığı tersine mühendislik çalışmasına dayanır (HID protokolü,
-Ghidra analizi, LCD yükleme araştırması). Protokol dokümanları
-[`ai-docs/`](./ai-docs) klasöründe onun çalışmasından alınmıştır.
+This project is based on the reverse engineering work done by [Parsia Hakimian](https://github.com/parsiya) for the Aula F108 Pro (HID protocol, Ghidra analysis, LCD upload research). The protocol documents in the [`ai-docs/`](https://www.google.com/search?q=./ai-docs) folder are taken from his work.
 
-Orijinal proje: [parsiya/f108-pro](https://github.com/parsiya/f108-pro)
+Original project: [parsiya/f108-pro](https://github.com/parsiya/f108-pro)
 
+## 📄 License
 
-## 📄 Lisans
-
-Bu proje açık kaynaklıdır. Detaylar için [LICENSE](LICENSE) dosyasına göz atabilirsiniz.
+This project is open-source. For details, you can check the [LICENSE](https://www.google.com/search?q=LICENSE) file.
