@@ -18,6 +18,7 @@ import {
   KeyRemapRule,
   HidPacketLog,
   DeviceConnectionState,
+  LcdVisualState,
 } from './types/aula';
 import { Language, getTranslation } from './lib/i18n';
 import { CheckCircle2, AlertCircle, AlertTriangle, ExternalLink } from 'lucide-react';
@@ -108,18 +109,13 @@ export const App: React.FC = () => {
 
   // 3. Key Remapping State
   const [isFnLayer, setIsFnLayer] = useState<boolean>(false);
-  const [normalRemaps, setNormalRemaps] = useState<KeyRemapRule[]>([
-    { sourceKey: 'capslock', action: 'key', targetKey: 'lctrl' },
-  ]);
-  const [fnRemaps, setFnRemaps] = useState<KeyRemapRule[]>([
-    { sourceKey: 'f1', action: 'consumer', consumerAction: 'play' },
-    { sourceKey: 'f2', action: 'consumer', consumerAction: 'volup' },
-    { sourceKey: 'f3', action: 'consumer', consumerAction: 'voldown' },
-  ]);
+  const [normalRemaps, setNormalRemaps] = useState<KeyRemapRule[]>([]);
+  const [fnRemaps, setFnRemaps] = useState<KeyRemapRule[]>([]);
   const [remapSelectedKey, setRemapSelectedKey] = useState<string>('capslock');
 
   // 4. LCD & Clock State
   const [lcdPreviewUrl, setLcdPreviewUrl] = useState<string | null>(null);
+  const [lcdVisualState, setLcdVisualState] = useState<LcdVisualState | null>(null);
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
   useEffect(() => {
@@ -152,11 +148,20 @@ export const App: React.FC = () => {
 
   const [isBusy, setIsBusy] = useState<boolean>(false);
 
+  useEffect(() => {
+    if (controllerRef.current) {
+      controllerRef.current.setLanguage(lang);
+    }
+  }, [lang]);
+
   // Auto-connect on page load if user previously authorized keyboard
   useEffect(() => {
-    controllerRef.current?.tryAutoConnect().then((connected) => {
+    if (controllerRef.current) {
+      controllerRef.current.setLanguage(lang);
+    }
+    controllerRef.current?.tryAutoConnect(lang).then((connected) => {
       if (connected) {
-        showToast(lang === 'tr' ? 'Aula F108 Pro otomatik olarak tanındı ve bağlandı!' : 'Aula F108 Pro auto-connected!', 'success');
+        showToast(t('toastAutoConnected'), 'success');
       }
     });
   }, []);
@@ -165,7 +170,7 @@ export const App: React.FC = () => {
   const handleConnect = async () => {
     if (!controllerRef.current) return;
     setIsBusy(true);
-    const res = await controllerRef.current.connect();
+    const res = await controllerRef.current.connect(lang);
     setIsBusy(false);
     if (res.success) {
       showToast(res.message, 'success');
@@ -177,14 +182,14 @@ export const App: React.FC = () => {
   const handleDisconnect = () => {
     if (!controllerRef.current) return;
     controllerRef.current.disconnect();
-    showToast(lang === 'tr' ? 'Klavye bağlantısı kesildi (Simülatör moduna geçildi)' : 'Disconnected (switched to Simulator mode)', 'success');
+    showToast(t('toastDisconnected'), 'success');
   };
 
   // Direct Apply Actions to physical keyboard
   const handleApplyLighting = async () => {
     if (!controllerRef.current) return;
     setIsBusy(true);
-    const res = await controllerRef.current.sendPackets(lightingPacketsResult.packets);
+    const res = await controllerRef.current.sendPackets(lightingPacketsResult.packets, undefined, lang);
     setIsBusy(false);
     if (res.success) {
       showToast(t('appliedBacklightSuccess'), 'success');
@@ -196,7 +201,7 @@ export const App: React.FC = () => {
   const handleApplyPerKey = async () => {
     if (!controllerRef.current) return;
     setIsBusy(true);
-    const res = await controllerRef.current.sendPackets(perKeyPacketsResult.packets);
+    const res = await controllerRef.current.sendPackets(perKeyPacketsResult.packets, undefined, lang);
     setIsBusy(false);
     if (res.success) {
       showToast(t('appliedPerKeySuccess'), 'success');
@@ -208,7 +213,7 @@ export const App: React.FC = () => {
   const handleApplyRemap = async () => {
     if (!controllerRef.current) return;
     setIsBusy(true);
-    const res = await controllerRef.current.sendPackets(remapPacketsResult.packets);
+    const res = await controllerRef.current.sendPackets(remapPacketsResult.packets, undefined, lang);
     setIsBusy(false);
     if (res.success) {
       showToast(t('appliedRemapSuccess'), 'success');
@@ -221,7 +226,7 @@ export const App: React.FC = () => {
     if (!controllerRef.current) return;
     setIsBusy(true);
     const { packets } = buildClockSyncPackets(date);
-    const res = await controllerRef.current.sendPackets(packets);
+    const res = await controllerRef.current.sendPackets(packets, undefined, lang);
     setIsBusy(false);
     if (res.success) {
       showToast(t('syncedClockSuccess'), 'success');
@@ -236,9 +241,14 @@ export const App: React.FC = () => {
     setUploadProgress({ active: true, sent: 0, total: pageCount, percent: 0 });
     showToast(t('uploadStartedToast'), 'success');
 
-    const res = await controllerRef.current.uploadLcdImage(buf, 1, (sent, total, percent) => {
-      setUploadProgress({ active: true, sent, total, percent });
-    });
+    const res = await controllerRef.current.uploadLcdImage(
+      buf,
+      1,
+      (sent, total, percent) => {
+        setUploadProgress({ active: true, sent, total, percent });
+      },
+      lang
+    );
 
     setIsBusy(false);
     if (res.success) {
@@ -353,6 +363,7 @@ export const App: React.FC = () => {
           remaps={activeRemapsMap}
           currentTime={currentTime}
           lcdPreviewUrl={lcdPreviewUrl}
+          lcdVisualState={lcdVisualState}
           lang={lang}
         />
 
@@ -380,6 +391,7 @@ export const App: React.FC = () => {
             cliCommand={perKeyPacketsResult.cliCommand}
             isBusy={isBusy}
             lang={lang}
+            onError={(msg) => showToast(msg, 'error')}
           />
         )}
 
@@ -398,10 +410,11 @@ export const App: React.FC = () => {
             onSelectKey={setRemapSelectedKey}
             isBusy={isBusy}
             lang={lang}
+            onError={(msg) => showToast(msg, 'error')}
           />
         )}
 
-        {activeTab === 'lcd' && (
+        <div className={activeTab === 'lcd' ? 'block' : 'hidden'}>
           <LcdTab
             onSyncClock={handleSyncClock}
             onUploadLcdBinary={handleUploadLcdBinary}
@@ -409,11 +422,12 @@ export const App: React.FC = () => {
             isConfigConnected={controllerRef.current?.isConfigInterfaceConnected || false}
             isLcdInterfaceConnected={controllerRef.current?.isLcdInterfaceConnected || false}
             setLcdPreviewUrl={setLcdPreviewUrl}
+            onLcdVisualStateChange={setLcdVisualState}
             isBusy={isBusy}
             lang={lang}
             uploadProgress={uploadProgress}
           />
-        )}
+        </div>
 
         {activeTab === 'packets' && (
           <PacketInspectorTab

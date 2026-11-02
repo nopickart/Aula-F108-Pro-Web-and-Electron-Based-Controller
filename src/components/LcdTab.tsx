@@ -32,6 +32,7 @@ import {
 } from '../lib/protocol';
 import { decodeGif, DecodedGif, DecodedGifFrame } from '../lib/gifDecoder';
 import { Language, getTranslation } from '../lib/i18n';
+import { LcdVisualState } from '../types/aula';
 
 interface LcdTabProps {
   onSyncClock: (date: Date) => void;
@@ -40,6 +41,7 @@ interface LcdTabProps {
   isConfigConnected?: boolean;
   isLcdInterfaceConnected?: boolean;
   setLcdPreviewUrl: (url: string | null) => void;
+  onLcdVisualStateChange?: (state: LcdVisualState) => void;
   isBusy?: boolean;
   lang: Language;
   uploadProgress?: { active: boolean; sent: number; total: number; percent: number } | null;
@@ -109,6 +111,7 @@ export const LcdTab: React.FC<LcdTabProps> = ({
   isConfigConnected = false,
   isLcdInterfaceConnected = false,
   setLcdPreviewUrl,
+  onLcdVisualStateChange,
   isBusy = false,
   lang,
   uploadProgress = null,
@@ -122,6 +125,8 @@ export const LcdTab: React.FC<LcdTabProps> = ({
   // Static Image & Animated GIF state
   const [uploadedImage, setUploadedImage] = useState<HTMLImageElement | null>(null);
   const [gifData, setGifData] = useState<DecodedGif | null>(null);
+  const [gifUrl, setGifUrl] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [rawGifBuffer, setRawGifBuffer] = useState<ArrayBuffer | null>(null);
   const [frameStrategy, setFrameStrategy] = useState<'sample' | 'truncate'>('sample');
 
@@ -382,6 +387,9 @@ export const LcdTab: React.FC<LcdTabProps> = ({
 
     if (isGif) {
       try {
+        const url = URL.createObjectURL(file);
+        setGifUrl(url);
+        setImageUrl(null);
         const buffer = await file.arrayBuffer();
         setRawGifBuffer(buffer);
         const decoded = decodeGif(buffer, frameStrategy);
@@ -392,13 +400,16 @@ export const LcdTab: React.FC<LcdTabProps> = ({
         setIsPlaying(true);
         handleResetAdjustments();
       } catch (err: any) {
-        setWarningMessage(`GIF çözümleme hatası: ${err.message || err}`);
+        const errPrefix = lang === 'tr' ? 'GIF çözümleme hatası:' : 'GIF decoding error:';
+        setWarningMessage(`${errPrefix} ${err.message || err}`);
       }
     } else {
       // Standard static image (PNG, JPEG, WebP, SVG)
-      const img = new Image();
       const url = URL.createObjectURL(file);
+      const img = new Image();
       img.onload = () => {
+        setImageUrl(url);
+        setGifUrl(null);
         setUploadedImage(img);
         setGifData(null);
         setRawGifBuffer(null);
@@ -406,12 +417,87 @@ export const LcdTab: React.FC<LcdTabProps> = ({
         setCurrentFrameIndex(0);
         setIsPlaying(false);
         handleResetAdjustments();
-        URL.revokeObjectURL(url);
       };
       img.src = url;
     }
     e.target.value = '';
   };
+
+  // Synchronize LCD visual state with parent (Virtual Keyboard)
+  useEffect(() => {
+    if (!onLcdVisualStateChange) return;
+
+    if (imageMode === 'custom' && gifUrl) {
+      onLcdVisualStateChange({
+        type: 'gif',
+        animationUrl: gifUrl,
+        previewUrl: null,
+        solidColor: null,
+        fitMode,
+        zoom,
+        panX,
+        panY,
+        letterboxBg,
+        brightness,
+        contrast,
+      });
+    } else if (imageMode === 'custom' && imageUrl) {
+      onLcdVisualStateChange({
+        type: 'image',
+        animationUrl: null,
+        previewUrl: imageUrl,
+        solidColor: null,
+        fitMode,
+        zoom,
+        panX,
+        panY,
+        letterboxBg,
+        brightness,
+        contrast,
+      });
+    } else if (imageMode === 'solid') {
+      onLcdVisualStateChange({
+        type: 'color',
+        animationUrl: null,
+        previewUrl: null,
+        solidColor,
+        fitMode: 'cover',
+        zoom: 1.0,
+        panX: 0,
+        panY: 0,
+        letterboxBg: '#000000',
+        brightness: 0,
+        contrast: 0,
+      });
+    } else {
+      onLcdVisualStateChange({
+        type: 'clock',
+        animationUrl: null,
+        previewUrl: null,
+        solidColor: null,
+        fitMode: 'cover',
+        zoom: 1.0,
+        panX: 0,
+        panY: 0,
+        letterboxBg: '#000000',
+        brightness: 0,
+        contrast: 0,
+      });
+    }
+  }, [
+    imageMode,
+    solidColor,
+    gifUrl,
+    imageUrl,
+    fitMode,
+    zoom,
+    panX,
+    panY,
+    letterboxBg,
+    brightness,
+    contrast,
+    onLcdVisualStateChange,
+  ]);
 
   const handleDownloadBinary = () => {
     if (!generatedBuffer) return;
@@ -455,7 +541,7 @@ export const LcdTab: React.FC<LcdTabProps> = ({
         <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between shadow-lg space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-              <Cpu className="w-4 h-4 text-cyan-400" /> USB Arayüz Durumu
+              <Cpu className="w-4 h-4 text-cyan-400" /> {lang === 'tr' ? 'USB Arayüz Durumu' : 'USB Interface Status'}
             </span>
             <span className="text-[10px] font-mono text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded">
               0x0C45:800A
@@ -465,7 +551,7 @@ export const LcdTab: React.FC<LcdTabProps> = ({
           <div className="space-y-1.5 text-[11px]">
             {/* Interface 3 */}
             <div className="flex items-center justify-between">
-              <span className="text-slate-400">Arayüz 3 (Kontrol & Saat):</span>
+              <span className="text-slate-400">{t('interface3Status')}</span>
               <span className={`inline-flex items-center gap-1 font-medium ${isConfigConnected ? 'text-emerald-400' : 'text-slate-500'}`}>
                 <span className={`w-2 h-2 rounded-full ${isConfigConnected ? 'bg-emerald-400 animate-pulse' : 'bg-slate-600'}`} />
                 {isConfigConnected ? t('interfaceConnected') : t('interfaceMissing')}
@@ -474,7 +560,7 @@ export const LcdTab: React.FC<LcdTabProps> = ({
 
             {/* Interface 2 */}
             <div className="flex items-center justify-between">
-              <span className="text-slate-400">Arayüz 2 (LCD Veri Hattı):</span>
+              <span className="text-slate-400">{t('interface2Status')}</span>
               <span className={`inline-flex items-center gap-1 font-medium ${isLcdInterfaceConnected ? 'text-emerald-400' : 'text-amber-400'}`}>
                 <span className={`w-2 h-2 rounded-full ${isLcdInterfaceConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
                 {isLcdInterfaceConnected ? t('interfaceConnected') : t('interfaceMissing')}
@@ -827,7 +913,7 @@ export const LcdTab: React.FC<LcdTabProps> = ({
                         : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
                     }`}
                   >
-                    Cover (Doldur)
+                    {lang === 'tr' ? 'Cover (Doldur)' : 'Cover (Fill)'}
                   </button>
                   <button
                     type="button"
@@ -838,7 +924,7 @@ export const LcdTab: React.FC<LcdTabProps> = ({
                         : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
                     }`}
                   >
-                    Contain (Sığdır)
+                    {lang === 'tr' ? 'Contain (Sığdır)' : 'Contain (Fit)'}
                   </button>
                   <button
                     type="button"
@@ -849,7 +935,7 @@ export const LcdTab: React.FC<LcdTabProps> = ({
                         : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
                     }`}
                   >
-                    Stretch (Esnet)
+                    {lang === 'tr' ? 'Stretch (Esnet)' : 'Stretch'}
                   </button>
                 </div>
               </div>
@@ -941,10 +1027,10 @@ export const LcdTab: React.FC<LcdTabProps> = ({
             <div className="p-2.5 rounded-xl bg-amber-950/30 border border-amber-800/50 text-[11px] text-amber-300 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
                 <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                Arayüz 2 (LCD Veri) için yetki bekleniyor.
+                {lang === 'tr' ? 'Arayüz 2 (LCD Veri) için yetki bekleniyor.' : 'Interface 2 (LCD Data) permission pending.'}
               </span>
               <span className="text-[10px] text-amber-400/80">
-                (Yukarıdaki 'Klavyeyi Bağla' ile izin yenileyin)
+                {lang === 'tr' ? "(Yukarıdaki 'Klavyeyi Bağla' ile izin yenileyin)" : "(Click 'Connect Keyboard' above to grant permission)"}
               </span>
             </div>
           )}

@@ -16,6 +16,7 @@ interface RemapTabProps {
   onSelectKey: (k: string) => void;
   isBusy?: boolean;
   lang?: Language;
+  onError?: (msg: string) => void;
 }
 
 export const RemapTab: React.FC<RemapTabProps> = ({
@@ -29,6 +30,7 @@ export const RemapTab: React.FC<RemapTabProps> = ({
   onSelectKey,
   isBusy = false,
   lang = 'tr',
+  onError,
 }) => {
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
   const [actionType, setActionType] = useState<RemapActionType>('key');
@@ -176,7 +178,8 @@ export const RemapTab: React.FC<RemapTabProps> = ({
         }
         onUpdateRemaps(newRemaps);
       } catch (err: any) {
-        alert('Invalid YAML remap file: ' + err.message);
+        const errorMsg = `${t('errYamlInvalid')} ${err.message || err}`;
+        if (onError) onError(errorMsg);
       }
     };
     reader.readAsText(file);

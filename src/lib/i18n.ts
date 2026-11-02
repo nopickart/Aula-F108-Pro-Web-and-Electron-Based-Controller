@@ -32,6 +32,7 @@ export const TRANSLATIONS = {
     legendRemapped: 'Eşlenmiş Tuş',
     legendTip: 'Tuşlara tıklayarak veya Shift+Click ile çoklu seçebilirsiniz',
     keyboardLcdLabel: 'Klavye LCD:',
+    liveAnimationBadge: 'Canlı Animasyon',
 
     // Backlight Tab
     lightingEffects: 'Arka Aydınlatma Efektleri (20 Mod)',
@@ -185,6 +186,13 @@ export const TRANSLATIONS = {
     uploadSuccessToast: 'Görsel doğrudan klavyeye başarıyla yüklendi!',
     copySuccess: 'Panoya Kopyalandı',
     copy: 'Kopyala',
+    toastAutoConnected: 'Aula F108 Pro otomatik olarak tanındı ve bağlandı!',
+    toastDisconnected: 'Klavye bağlantısı kesildi (Simülatör moduna geçildi)',
+    errWebHidNotSupported: 'Tarayıcınız WebHID API desteklemiyor. Lütfen Chrome, Chromium, Brave veya Edge kullanın.',
+    errDeviceNotFound: 'Aula F108 Pro klavyesi bulunamadı veya seçim iptal edildi.',
+    errIframePolicy: 'İframe içinde WebHID erişimi tarayıcı güvenlik kuralı nedeniyle engellidir. Klavyeye doğrudan bağlanmak için lütfen üstteki "Yeni Sekmede Aç" butonuna tıklayın.',
+    errKeyboardNotConnected: 'Klavye bağlı değil. Lütfen önce klavyenizi seçin.',
+    errYamlInvalid: 'Geçersiz YAML dosyası:',
 
     // Colors
     colorRed: 'Kırmızı',
@@ -228,6 +236,7 @@ export const TRANSLATIONS = {
     legendRemapped: 'Remapped Key',
     legendTip: 'Click keys or Shift+Click to multi-select',
     keyboardLcdLabel: 'Keyboard LCD:',
+    liveAnimationBadge: 'Live Animation',
 
     // Backlight Tab
     lightingEffects: 'Backlight Lighting Effects (20 Modes)',
@@ -381,6 +390,13 @@ export const TRANSLATIONS = {
     uploadSuccessToast: 'Image transferred to keyboard LCD screen!',
     copySuccess: 'Copied to Clipboard',
     copy: 'Copy',
+    toastAutoConnected: 'Aula F108 Pro auto-recognized and connected!',
+    toastDisconnected: 'Keyboard disconnected (Switched to Simulator mode)',
+    errWebHidNotSupported: 'Your browser does not support the WebHID API. Please use Chrome, Chromium, Brave, or Edge.',
+    errDeviceNotFound: 'Aula F108 Pro keyboard not found or connection cancelled.',
+    errIframePolicy: 'WebHID access inside iframe is blocked by browser permissions policy. To connect directly to your keyboard, please click the "Open in New Tab" button above.',
+    errKeyboardNotConnected: 'Keyboard is not connected. Please connect your keyboard first.',
+    errYamlInvalid: 'Invalid YAML file:',
 
     // Colors
     colorRed: 'Red',

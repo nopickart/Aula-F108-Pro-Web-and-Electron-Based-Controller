@@ -98,3 +98,18 @@ export interface DeviceConnectionState {
   vendorId?: number;
   productId?: number;
 }
+
+export interface LcdVisualState {
+  type: 'clock' | 'color' | 'image' | 'gif';
+  animationUrl: string | null;
+  previewUrl: string | null;
+  solidColor: string | null;
+  fitMode: 'cover' | 'contain' | 'stretch';
+  zoom: number;
+  panX: number;
+  panY: number;
+  letterboxBg: string;
+  brightness: number;
+  contrast: number;
+}
+

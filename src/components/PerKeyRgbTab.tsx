@@ -15,6 +15,7 @@ interface PerKeyRgbTabProps {
   cliCommand: string;
   isBusy?: boolean;
   lang?: Language;
+  onError?: (msg: string) => void;
 }
 
 const PALETTE = [
@@ -41,6 +42,7 @@ export const PerKeyRgbTab: React.FC<PerKeyRgbTabProps> = ({
   cliCommand,
   isBusy = false,
   lang = 'tr',
+  onError,
 }) => {
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
   const [paintColor, setPaintColor] = useState<[number, number, number]>([0, 255, 255]);
@@ -156,7 +158,8 @@ export const PerKeyRgbTab: React.FC<PerKeyRgbTabProps> = ({
         }
         onUpdateColors(next);
       } catch (err: any) {
-        alert('Invalid YAML file: ' + err.message);
+        const errorMsg = `${t('errYamlInvalid')} ${err.message || err}`;
+        if (onError) onError(errorMsg);
       }
     };
     reader.readAsText(file);

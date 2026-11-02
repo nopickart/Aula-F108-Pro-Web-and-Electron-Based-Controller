@@ -3,6 +3,7 @@ import {
   KeyRemapRule,
   HidPacketLog,
 } from '../types/aula';
+import { Language } from './i18n';
 import {
   VENDOR_ID,
   PRODUCT_ID,
@@ -351,6 +352,7 @@ export class AulaDeviceController {
   private onLogsChanged?: (logs: HidPacketLog[]) => void;
   private onStatusChanged?: () => void;
   public isSimulated: boolean = true;
+  public lang: Language = 'tr';
   private isLcdUploading: boolean = false;
   private lcdAbortController: AbortController | null = null;
 
@@ -360,6 +362,10 @@ export class AulaDeviceController {
   ) {
     this.onLogsChanged = onLogsChanged;
     this.onStatusChanged = onStatusChanged;
+  }
+
+  public setLanguage(lang: Language): void {
+    this.lang = lang;
   }
 
   public get isConnected(): boolean {
@@ -467,7 +473,13 @@ export class AulaDeviceController {
       this.lcdAbortController = null;
     }
     this.isLcdUploading = false;
-    this.addLog('RX', 'LCD aktarımı kullanıcı tarafından güvenle iptal edildi.', [0x00]);
+    this.addLog(
+      'RX',
+      this.lang === 'tr'
+        ? 'LCD aktarımı kullanıcı tarafından güvenle iptal edildi.'
+        : 'LCD transfer was safely cancelled by user.',
+      [0x00]
+    );
     this.onStatusChanged?.();
   }
 
@@ -527,7 +539,8 @@ export class AulaDeviceController {
   /**
    * Tries to automatically connect if device permission was already granted previously.
    */
-  public async tryAutoConnect(): Promise<boolean> {
+  public async tryAutoConnect(lang?: Language): Promise<boolean> {
+    const l = lang || this.lang;
     if (!this.isWebHidSupported) return false;
     try {
       const devices = await (navigator as any).hid.getDevices();
@@ -553,7 +566,9 @@ export class AulaDeviceController {
         const hasLcd = this.lcdDevice && this.lcdDevice.opened;
         this.addLog(
           'RX',
-          `Otomatik Bağlantı Kuruldu: ${this.hidDevice.productName || 'Aula F108 Pro'} [Arayüz 3: Hazır, Arayüz 2 LCD: ${hasLcd ? 'Hazır' : 'Ayrılmış'}]`,
+          l === 'tr'
+            ? `Otomatik Bağlantı Kuruldu: ${this.hidDevice.productName || 'Aula F108 Pro'} [Arayüz 3: Hazır, Arayüz 2 LCD: ${hasLcd ? 'Hazır' : 'Ayrılmış'}]`
+            : `Auto-Connected: ${this.hidDevice.productName || 'Aula F108 Pro'} [Interface 3: Ready, Interface 2 LCD: ${hasLcd ? 'Ready' : 'Detached'}]`,
           [0x04, 0x18]
         );
         this.onStatusChanged?.();
@@ -565,14 +580,22 @@ export class AulaDeviceController {
     return false;
   }
 
-  public async connect(): Promise<{ success: boolean; message: string }> {
+  public async connect(lang?: Language): Promise<{ success: boolean; message: string }> {
+    const l = lang || this.lang;
     if (!this.isWebHidSupported) {
       this.isSimulated = true;
-      this.addLog('RX', 'WebHID API desteklenmiyor; Simülatör aktif.', [0]);
+      this.addLog(
+        'RX',
+        l === 'tr' ? 'WebHID API desteklenmiyor; Simülatör aktif.' : 'WebHID API not supported; Simulator mode active.',
+        [0]
+      );
       this.onStatusChanged?.();
       return {
         success: false,
-        message: 'Tarayıcınız WebHID API desteklemiyor. Lütfen Chrome, Chromium, Brave veya Edge kullanın.',
+        message:
+          l === 'tr'
+            ? 'Tarayıcınız WebHID API desteklemiyor. Lütfen Chrome, Chromium, Brave veya Edge kullanın.'
+            : 'Your browser does not support the WebHID API. Please use Chrome, Chromium, Brave, or Edge.',
       };
     }
 
@@ -591,7 +614,13 @@ export class AulaDeviceController {
       const lcdCandidate = this.findLcdDevice(allDevices);
 
       if (!targetDevice) {
-        return { success: false, message: 'Aula F108 Pro klavyesi bulunamadı veya seçim iptal edildi.' };
+        return {
+          success: false,
+          message:
+            l === 'tr'
+              ? 'Aula F108 Pro klavyesi bulunamadı veya seçim iptal edildi.'
+              : 'Aula F108 Pro keyboard not found or connection cancelled.',
+        };
       }
 
       this.hidDevice = targetDevice;
@@ -614,25 +643,32 @@ export class AulaDeviceController {
       const hasLcd = this.lcdDevice && this.lcdDevice.opened;
       this.addLog(
         'RX',
-        `Klavye Doğrudan Bağlandı: ${this.hidDevice.productName || 'Aula F108 Pro'} [Arayüz 3: Aktif, Arayüz 2 (LCD): ${hasLcd ? 'Aktif' : 'Ayrılmış'}]`,
+        l === 'tr'
+          ? `Klavye Doğrudan Bağlandı: ${this.hidDevice.productName || 'Aula F108 Pro'} [Arayüz 3: Aktif, Arayüz 2 (LCD): ${hasLcd ? 'Aktif' : 'Ayrılmış'}]`
+          : `Keyboard Connected Directly: ${this.hidDevice.productName || 'Aula F108 Pro'} [Interface 3: Active, Interface 2 (LCD): ${hasLcd ? 'Active' : 'Detached'}]`,
         [0x04, 0x18]
       );
       this.onStatusChanged?.();
       return {
         success: true,
-        message: `Aula F108 Pro bağlandı! (Arayüz 3 Yapılandırma: Hazır${hasLcd ? ', Arayüz 2 LCD: Hazır' : ''})`,
+        message:
+          l === 'tr'
+            ? `Aula F108 Pro bağlandı! (Arayüz 3 Yapılandırma: Hazır${hasLcd ? ', Arayüz 2 LCD: Hazır' : ''})`
+            : `Aula F108 Pro connected! (Interface 3 Config: Ready${hasLcd ? ', Interface 2 LCD: Ready' : ''})`,
       };
     } catch (err: any) {
-      const isPolicyError = err.message && (
-        err.message.includes('permissions policy') ||
-        err.message.includes('Permissions policy') ||
-        err.message.includes('disallowed by permissions policy')
-      );
+      const isPolicyError =
+        err.message &&
+        (err.message.includes('permissions policy') ||
+          err.message.includes('Permissions policy') ||
+          err.message.includes('disallowed by permissions policy'));
       const userMessage = isPolicyError
-        ? 'İframe içinde WebHID erişimi tarayıcı güvenlik kuralı nedeniyle engellidir. Klavyeye doğrudan bağlanmak için lütfen üstteki "Yeni Sekmede Aç" butonuna tıklayın.'
-        : err.message;
+        ? l === 'tr'
+          ? 'İframe içinde WebHID erişimi tarayıcı güvenlik kuralı nedeniyle engellidir. Klavyeye doğrudan bağlanmak için lütfen üstteki "Yeni Sekmede Aç" butonuna tıklayın.'
+          : 'WebHID access inside iframe is blocked by browser permissions policy. To connect directly to your keyboard, please click the "Open in New Tab" button above.'
+        : err.message || (l === 'tr' ? 'Bağlantı hatası oluştu.' : 'A connection error occurred.');
 
-      this.addLog('RX', `Bağlantı hatası: ${userMessage}`, [0xff]);
+      this.addLog('RX', l === 'tr' ? `Bağlantı hatası: ${userMessage}` : `Connection error: ${userMessage}`, [0xff]);
       this.isSimulated = true;
       this.onStatusChanged?.();
       return { success: false, message: userMessage };
@@ -646,15 +682,23 @@ export class AulaDeviceController {
     }
     this.isLcdUploading = false;
     if (this.lcdDevice && this.lcdDevice.opened) {
-      try { this.lcdDevice.close(); } catch {}
+      try {
+        this.lcdDevice.close();
+      } catch {}
     }
     this.lcdDevice = null;
     if (this.hidDevice && this.hidDevice.opened) {
-      try { this.hidDevice.close(); } catch {}
+      try {
+        this.hidDevice.close();
+      } catch {}
     }
     this.hidDevice = null;
     this.isSimulated = true;
-    this.addLog('RX', 'Bağlantı kesildi. Simülatör moduna geçildi.', [0x00]);
+    this.addLog(
+      'RX',
+      this.lang === 'tr' ? 'Bağlantı kesildi. Simülatör moduna geçildi.' : 'Disconnected. Switched to Simulator mode.',
+      [0x00]
+    );
     this.onStatusChanged?.();
   }
 
@@ -686,13 +730,15 @@ export class AulaDeviceController {
    */
   public async sendPackets(
     packets: AulaPacket[],
-    onProgress?: (index: number, total: number) => void
+    onProgress?: (index: number, total: number) => void,
+    lang?: Language
   ): Promise<{ success: boolean; message: string }> {
+    const l = lang || this.lang;
     // If not connected, attempt auto-connect or prompt
     if (!this.isConnected) {
-      const autoOk = await this.tryAutoConnect();
+      const autoOk = await this.tryAutoConnect(l);
       if (!autoOk) {
-        const connRes = await this.connect();
+        const connRes = await this.connect(l);
         if (!connRes.success) {
           return { success: false, message: connRes.message };
         }
@@ -700,7 +746,10 @@ export class AulaDeviceController {
     }
 
     if (!this.isConnected || !this.hidDevice) {
-      return { success: false, message: 'Klavye bağlı değil. Lütfen önce klavyenizi seçin.' };
+      return {
+        success: false,
+        message: l === 'tr' ? 'Klavye bağlı değil. Lütfen önce klavyenizi seçin.' : 'Keyboard is not connected. Please connect your keyboard first.',
+      };
     }
 
     try {
@@ -733,10 +782,13 @@ export class AulaDeviceController {
         onProgress?.(i + 1, packets.length);
       }
 
-      return { success: true, message: 'Komutlar klavyeye başarıyla uygulandı!' };
+      return {
+        success: true,
+        message: l === 'tr' ? 'Komutlar klavyeye başarıyla uygulandı!' : 'Commands applied successfully to keyboard!',
+      };
     } catch (e: any) {
-      this.addLog('RX', `Gönderim hatası: ${e.message}`, [0xff]);
-      return { success: false, message: `Hata: ${e.message}` };
+      this.addLog('RX', l === 'tr' ? `Gönderim hatası: ${e.message}` : `Transmission error: ${e.message}`, [0xff]);
+      return { success: false, message: l === 'tr' ? `Hata: ${e.message}` : `Error: ${e.message}` };
     }
   }
 
@@ -747,12 +799,14 @@ export class AulaDeviceController {
   public async uploadLcdImage(
     buf: Uint8Array,
     imageNumber: number = 1,
-    onProgress?: (sent: number, total: number, percent: number) => void
+    onProgress?: (sent: number, total: number, percent: number) => void,
+    lang?: Language
   ): Promise<{ success: boolean; message: string }> {
+    const l = lang || this.lang;
     if (!this.isConnected) {
-      const autoOk = await this.tryAutoConnect();
+      const autoOk = await this.tryAutoConnect(l);
       if (!autoOk) {
-        const connRes = await this.connect();
+        const connRes = await this.connect(l);
         if (!connRes.success) {
           return { success: false, message: connRes.message };
         }
@@ -760,7 +814,10 @@ export class AulaDeviceController {
     }
 
     if (!this.isConnected || !this.hidDevice) {
-      return { success: false, message: 'Klavye bağlı değil.' };
+      return {
+        success: false,
+        message: l === 'tr' ? 'Klavye bağlı değil.' : 'Keyboard is not connected.',
+      };
     }
 
     // Try finding and opening Interface 2 (LCD Data interface) if not already opened
@@ -785,25 +842,35 @@ export class AulaDeviceController {
     if (!this.lcdDevice || !this.lcdDevice.opened) {
       this.addLog(
         'RX',
-        'GÜVENLİK KORUMASI: Arayüz 2 (0xFF68 LCD Veri Hattı) bulunamadı. Klavye firmware kilitlenmesini önlemek için aktarım engellendi.',
+        l === 'tr'
+          ? 'GÜVENLİK KORUMASI: Arayüz 2 (0xFF68 LCD Veri Hattı) bulunamadı. Klavye firmware kilitlenmesini önlemek için aktarım engellendi.'
+          : 'SAFETY GUARD: Interface 2 (0xFF68 LCD Data Stream) not found. Transfer blocked to prevent keyboard firmware hang.',
         [0xff, 0x68]
       );
       return {
         success: false,
         message:
-          'Güvenlik Koruması Devrede: Arayüz 2 (LCD Veri Hattı) açık değil. Klavyenizin kilitlenmemesi için 4096 baytlık veri Kontrol hattına gönderilmedi. Lütfen üstteki "Klavyeyi Bağla" butonuna basarak tüm arayüz izinlerini yenileyin veya hazırlanan .bin dosyasını Linux terminaliyle (f108-pro lcd) yükleyin.',
+          l === 'tr'
+            ? 'Güvenlik Koruması Devrede: Arayüz 2 (LCD Veri Hattı) açık değil. Klavyenizin kilitlenmemesi için 4096 baytlık veri Kontrol hattına gönderilmedi. Lütfen üstteki "Klavyeyi Bağla" butonuna basarak tüm arayüz izinlerini yenileyin veya hazırlanan .bin dosyasını Linux terminaliyle (f108-pro lcd) yükleyin.'
+            : 'Safety Guard Active: Interface 2 (LCD Data Stream) is not open. 4096-byte transfer to Control line was blocked to prevent MCU hang. Please click "Connect Keyboard" above to approve all interface permissions or flash the generated .bin via Linux terminal (f108-pro lcd).',
       };
     }
 
     const pageCount = Math.ceil(buf.length / LCD_PAGE_SIZE);
     if (pageCount === 0) {
-      return { success: false, message: 'Görsel tamponu boş.' };
+      return {
+        success: false,
+        message: l === 'tr' ? 'Görsel tamponu boş.' : 'Image buffer is empty.',
+      };
     }
 
     if (pageCount > 2231) {
       return {
         success: false,
-        message: 'GÜVENLİK KORUMASI: 141 kareden (2231 sayfa) büyük veri flash menü grafiklerini bozabileceği için engellendi.',
+        message:
+          l === 'tr'
+            ? 'GÜVENLİK KORUMASI: 141 kareden (2231 sayfa) büyük veri flash menü grafiklerini bozabileceği için engellendi.'
+            : 'SAFETY GUARD: Data larger than 141 frames (2231 pages) blocked to avoid corrupting flash menu graphics.',
       };
     }
 
@@ -816,12 +883,12 @@ export class AulaDeviceController {
       this.addLog('TX', 'LCD Begin (04 18)', cmdBegin());
       const beginSent = await this.safeSendFeatureReport(this.hidDevice, 0, cmdBegin(), 1000);
       if (!beginSent) {
-        throw new Error('LCD Begin (04 18) komutu gönderilemedi.');
+        throw new Error(l === 'tr' ? 'LCD Begin (04 18) komutu gönderilemedi.' : 'Failed to send LCD Begin (04 18) command.');
       }
       await new Promise((r) => setTimeout(r, 40));
       await this.safeReceiveFeatureReport(this.hidDevice, 0, 600);
 
-      if (signal.aborted) throw new Error('Aktarım kullanıcı tarafından durduruldu.');
+      if (signal.aborted) throw new Error(l === 'tr' ? 'Aktarım kullanıcı tarafından durduruldu.' : 'Transfer was cancelled by user.');
 
       // Step 2: Image Header 04 72 (Feature Report on Interface 3)
       const hdr = new Uint8Array(64);
@@ -830,20 +897,20 @@ export class AulaDeviceController {
       hdr[2] = imageNumber; // Slot 1
       hdr[8] = pageCount & 0xff;
       hdr[9] = (pageCount >> 8) & 0xff;
-      this.addLog('TX', `LCD Header (04 72, ${pageCount} sayfa)`, hdr);
+      this.addLog('TX', `LCD Header (04 72, ${pageCount} ${l === 'tr' ? 'sayfa' : 'pages'})`, hdr);
       const hdrSent = await this.safeSendFeatureReport(this.hidDevice, 0, hdr, 1000);
       if (!hdrSent) {
-        throw new Error('LCD Header (04 72) komutu gönderilemedi.');
+        throw new Error(l === 'tr' ? 'LCD Header (04 72) komutu gönderilemedi.' : 'Failed to send LCD Header (04 72) command.');
       }
       await new Promise((r) => setTimeout(r, 50));
       await this.safeReceiveFeatureReport(this.hidDevice, 0, 600);
 
-      if (signal.aborted) throw new Error('Aktarım kullanıcı tarafından durduruldu.');
+      if (signal.aborted) throw new Error(l === 'tr' ? 'Aktarım kullanıcı tarafından durduruldu.' : 'Transfer was cancelled by user.');
 
       // Step 3: Send 4096-byte pages strictly via Interface 2 Output Reports
       for (let i = 0; i < pageCount; i++) {
         if (signal.aborted) {
-          throw new Error('Aktarım kullanıcı tarafından durduruldu.');
+          throw new Error(l === 'tr' ? 'Aktarım kullanıcı tarafından durduruldu.' : 'Transfer was cancelled by user.');
         }
 
         const start = i * LCD_PAGE_SIZE;
@@ -881,7 +948,11 @@ export class AulaDeviceController {
         if (!pageSent) {
           if (ackTimer) clearTimeout(ackTimer);
           try { this.lcdDevice?.removeEventListener('inputreport', ackHandler); } catch {}
-          throw new Error(`Sayfa ${i + 1}/${pageCount} iletim hatası. Arayüz 2 yazımı başarısız oldu.`);
+          throw new Error(
+            l === 'tr'
+              ? `Sayfa ${i + 1}/${pageCount} iletim hatası. Arayüz 2 yazımı başarısız oldu.`
+              : `Page ${i + 1}/${pageCount} transmission error. Interface 2 write failed.`
+          );
         }
 
         // Await ACK with 800ms watchdog (non-blocking if keyboard responds fast or silently)
@@ -895,7 +966,7 @@ export class AulaDeviceController {
         await new Promise((r) => setTimeout(r, 30));
       }
 
-      if (signal.aborted) throw new Error('Aktarım kullanıcı tarafından durduruldu.');
+      if (signal.aborted) throw new Error(l === 'tr' ? 'Aktarım kullanıcı tarafından durduruldu.' : 'Transfer was cancelled by user.');
 
       // Step 4: Settle delay for SPI flash before final commit
       await new Promise((r) => setTimeout(r, 350));
@@ -915,11 +986,26 @@ export class AulaDeviceController {
       // Reached 100%
       onProgress?.(pageCount, pageCount, 100);
 
-      this.addLog('RX', `LCD Görsel Aktarımı Başarıyla Tamamlandı (${pageCount} sayfa)`, [0x01, 0x5a, 0x02, 0x00]);
-      return { success: true, message: `LCD ekran görseli (${pageCount} sayfa) klavyeye başarıyla yüklendi!` };
+      this.addLog(
+        'RX',
+        l === 'tr'
+          ? `LCD Görsel Aktarımı Başarıyla Tamamlandı (${pageCount} sayfa)`
+          : `LCD Image Transfer Completed Successfully (${pageCount} pages)`,
+        [0x01, 0x5a, 0x02, 0x00]
+      );
+      return {
+        success: true,
+        message:
+          l === 'tr'
+            ? `LCD ekran görseli (${pageCount} sayfa) klavyeye başarıyla yüklendi!`
+            : `LCD screen image (${pageCount} pages) uploaded successfully to keyboard!`,
+      };
     } catch (err: any) {
-      this.addLog('RX', `LCD Yükleme Durumu: ${err.message}`, [0xff]);
-      return { success: false, message: err.message || 'LCD yükleme işlemi kesildi.' };
+      this.addLog('RX', l === 'tr' ? `LCD Yükleme Durumu: ${err.message}` : `LCD Upload Status: ${err.message}`, [0xff]);
+      return {
+        success: false,
+        message: err.message || (l === 'tr' ? 'LCD yükleme işlemi kesildi.' : 'LCD upload was interrupted.'),
+      };
     } finally {
       this.isLcdUploading = false;
       this.lcdAbortController = null;
